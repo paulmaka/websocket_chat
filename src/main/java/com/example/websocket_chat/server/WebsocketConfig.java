@@ -1,4 +1,4 @@
-package com.example.websocket_chat;
+package com.example.websocket_chat.server;
 
 
 import org.springframework.context.annotation.Configuration;

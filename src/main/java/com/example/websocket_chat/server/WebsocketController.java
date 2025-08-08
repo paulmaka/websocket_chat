@@ -1,6 +1,7 @@
-package com.example.websocket_chat;
+package com.example.websocket_chat.server;
 
 
+import com.example.websocket_chat.common.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -63,5 +64,12 @@ public class WebsocketController {
         sessionManager.removedUsername(username);
         sessionManager.broadcastActiveUsernames();
         System.out.println(username + " disconnected!");
+    }
+
+
+    @MessageMapping("/request-users")
+    public void requestUsers() {
+        sessionManager.broadcastActiveUsernames();
+        System.out.println("Requesting Users");
     }
 }

@@ -1,6 +1,6 @@
 package com.example.websocket_chat.client;
 
-import com.example.websocket_chat.Message;
+import com.example.websocket_chat.common.Message;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -25,7 +25,7 @@ public class StompClient {
     private StompSession session;
     private String username;
 
-    public StompClient(String username) throws ExecutionException, InterruptedException {
+    public StompClient(MessageListener messageListener, String username) throws ExecutionException, InterruptedException {
         this.username = username;
 
 
@@ -43,7 +43,7 @@ public class StompClient {
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
         // Создаётся обработчик сессии STOMP, он управляет логикой внутри сессии. Задаёт действия после подключения, при получении сообщений, при получнеии ошибок
-        StompSessionHandler sessionHandler = new StompSessionHandler(username);
+        StompSessionHandler sessionHandler = new StompSessionHandler(messageListener, username);
 
         // Адрес WebSocket сервера.
         String url = "ws://localhost:8080/ws";

@@ -1,12 +1,13 @@
 package com.example.websocket_chat.client;
 
-import com.example.websocket_chat.Message;
+import com.example.websocket_chat.common.Message;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 
 /**
@@ -14,9 +15,11 @@ import java.lang.reflect.Type;
  */
 public class StompSessionHandler extends StompSessionHandlerAdapter {
     private String username;
+    private MessageListener messageListener;
 
-    public StompSessionHandler(String username) {
+    public StompSessionHandler(MessageListener messageListener, String username) {
         this.username = username;
+        this.messageListener = messageListener;
     }
 
 
@@ -24,9 +27,6 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
         System.out.println("Client " + username + " Connected!");
-
-        // Отправка сообщения на /app/connect, чтобы добавить нового пользователя в список
-        session.send("/app/connect", username);
 
         // Все сообщения, отправленные сервером на /topic/messages будут попадать в handleFrame
         session.subscribe("/topic/messages", new StompFrameHandler() {
@@ -39,6 +39,7 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
                 try {
                     if(payload instanceof Message) {
                         Message message = (Message) payload;
+                        messageListener.onMessageReceive(message);
                         System.out.println("Received message: " + message.getUser() + ": " + message.getMessage());
                     } else {
                         System.out.println("Received unexpected payload type: " + payload.getClass());
@@ -51,6 +52,31 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
 
         System.out.println("Client subscribed to /topic/messages");
 
+
+        session.subscribe("/topic/users", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return new ArrayList<String>().getClass();
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof ArrayList) {
+                        ArrayList<String> listOfUsers = (ArrayList<String>) payload;
+                        messageListener.onActiveUsersUpdated(listOfUsers);
+                        System.out.println("Received list of active users: " + listOfUsers);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/users");
+
+        // Отправка сообщения на /app/connect, чтобы добавить нового пользователя в список
+        session.send("/app/connect", username);
+        session.send("/app/request-users", "");
     }
 
     // Вызывается если происходит ошибка соединения

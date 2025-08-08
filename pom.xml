@@ -57,17 +57,22 @@
 
 	<build>
 		<plugins>
+			<!-- Maven Compiler Plugin - исключаем пакет client -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<excludes>
+						<exclude>com/example/websocket_chat/client/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<!-- Spring Boot Maven Plugin (без exclude) -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<!-- Исключаем клиентский код из jar -->
-						<exclude>
-							com/example/websocket_chat/client/**
-						</exclude>
-					</excludes>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>

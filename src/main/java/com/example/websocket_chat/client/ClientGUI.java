@@ -10,7 +10,6 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
-//TODO Добавить чат с разных сторон
 public class ClientGUI extends JFrame implements MessageListener{
 
     // Выводим их в поля класса, так как содержимое этих панелей будет обновляться
@@ -22,7 +21,7 @@ public class ClientGUI extends JFrame implements MessageListener{
 
     public ClientGUI(String username) throws ExecutionException, InterruptedException {
         super("User: " + username);
-        this.username=username;
+        this.username = username;
         stompClient = new StompClient(this, username);
 
         setSize(1218, 685);
@@ -135,26 +134,34 @@ public class ClientGUI extends JFrame implements MessageListener{
 
     private JPanel createChatMessageComponent(Message message) {
         JPanel chatMessage = new JPanel();
+
         chatMessage.setBackground(Utilities.TRANSPARENT_COLOR);
         chatMessage.setLayout(new BoxLayout(chatMessage, BoxLayout.Y_AXIS));
         chatMessage.setBorder(Utilities.addPadding(20, 20, 10, 20));
 
         JLabel usernameLabel = new JLabel(message.getUser());
-        usernameLabel.setFont(new Font("inter", Font.BOLD, 18));
+        usernameLabel.setFont(new Font("Inter", Font.BOLD, 18));
         usernameLabel.setForeground(Utilities.TEXT_COLOR);
-
-        chatMessage.add(usernameLabel);
 
 //        JLabel messageLabel = new JLabel(message.getMessage());
         JLabel messageLabel = new JLabel();
-        messageLabel.setText("<html>" +
-                "<body style='width:" + (0.60 * getWidth()) + "'px>" +
-                message.getMessage() +
-                "</body>"+
-                "</html>");
+        messageLabel.putClientProperty("rawText", message.getMessage());
+        //TODO разобраться с динамическим переносом строк
+        updateMessageLabelWidth(messageLabel);
         messageLabel.setFont(new Font("Inter", Font.PLAIN, 16));
         messageLabel.setForeground(Utilities.TEXT_COLOR);
 
+        if (username.equals(message.getUser())) {
+            usernameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            messageLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+            messageLabel.setText("<html><div style='width:" + (0.60 * getWidth()) +
+                    "px; text-align:right'>" +
+                    message.getMessage() + "</div></html>");
+
+        }
+
+        chatMessage.add(usernameLabel);
         chatMessage.add(messageLabel);
 
         return chatMessage;
@@ -187,12 +194,12 @@ public class ClientGUI extends JFrame implements MessageListener{
         userListPanel.setLayout(new BoxLayout(userListPanel, BoxLayout.Y_AXIS));
 
         for (String user : users) {
-            JLabel username = new JLabel();
-            username.setText(user);
-            username.setForeground(Utilities.TEXT_COLOR);
-            username.setFont(new Font("Inter", Font.BOLD, 16));
+            JLabel usernameLabel = new JLabel();
+            usernameLabel.setText(user);
+            usernameLabel.setForeground(Utilities.TEXT_COLOR);
+            usernameLabel.setFont(new Font("Inter", Font.BOLD, 16));
 
-            userListPanel.add(username);
+            userListPanel.add(usernameLabel);
         }
 
         connectedUsersPanel.add(userListPanel);
@@ -209,13 +216,18 @@ public class ClientGUI extends JFrame implements MessageListener{
                 JPanel chatMessage = (JPanel) component;
                 if (chatMessage.getComponent(1) instanceof JLabel) {
                     JLabel messageLabel = (JLabel) chatMessage.getComponent(1);
-                    messageLabel.setText("<html>" +
-                            "<body style='width:" + (0.60 * getWidth()) + "'px>" +
-                            messageLabel.getText() +
-                            "</body>"+
-                            "</html>");
+                    updateMessageLabelWidth(messageLabel);
                 }
             }
         }
+        revalidate();
+        repaint();
+    }
+
+    private void updateMessageLabelWidth(JLabel label) {
+        String rawText = (String) label.getClientProperty("rawText");
+        label.setText("<html><div style='width:" + (int)(0.60 * getWidth()) +
+                "px; white-space: normal; word-wrap: break-word;'>" +
+                rawText + "</div></html>");
     }
 }

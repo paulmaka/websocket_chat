@@ -1,6 +1,7 @@
-package com.example.websocket_chat.client;
+package com.example.websocket_chat;
 
-import com.example.websocket_chat.common.Message;
+
+import jdk.jshell.execution.Util;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -59,7 +60,7 @@ public class ClientGUI extends JFrame implements MessageListener{
 
     private void addConnectedUsersComponents() {
         connectedUsersPanel = new JPanel();
-        connectedUsersPanel.setBorder(Utilities.addPadding(10, 10, 10, 10));
+        connectedUsersPanel.setBorder(Utilities.addPadding(10, 10, 10, 10, Utilities.THIRD_COLOR));
         connectedUsersPanel.setLayout(new BoxLayout(connectedUsersPanel, BoxLayout.Y_AXIS));
         connectedUsersPanel.setBackground(Utilities.SECONDARY_COLOR);
         connectedUsersPanel.setPreferredSize(new Dimension(200, getHeight()));
@@ -97,9 +98,9 @@ public class ClientGUI extends JFrame implements MessageListener{
         chatPanel.add(messageScrollPane, BorderLayout.CENTER);
 
         JPanel inputPanel = new JPanel();
-        inputPanel.setBorder(Utilities.addPadding(10, 10, 10, 10));
+        inputPanel.setBorder(Utilities.addPadding(5, 5, 5, 5, Utilities.THIRD_COLOR));
         inputPanel.setLayout(new BorderLayout());
-        inputPanel.setBackground(Utilities.TRANSPARENT_COLOR);
+        inputPanel.setBackground(Utilities.SECONDARY_COLOR);
 
         JTextField inputField = new JTextField();
         inputField.addKeyListener(new KeyAdapter() {
@@ -111,14 +112,13 @@ public class ClientGUI extends JFrame implements MessageListener{
                     if (input.isEmpty()) {
                         return;
                     }
-
                     inputField.setText("");
 
                     stompClient.sendMessage(new Message(username, input));
                 }
             }
         });
-        inputField.setBackground(Utilities.SECONDARY_COLOR);
+        inputField.setBackground(Utilities.PRIMARY_COLOR);
         inputField.setForeground(Utilities.TEXT_COLOR);
         inputField.setBorder(Utilities.addPadding(0, 10, 0, 10));
         inputField.setFont(new Font("Inter", Font.PLAIN, 16));

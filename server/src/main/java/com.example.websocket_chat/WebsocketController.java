@@ -1,7 +1,6 @@
-package com.example.websocket_chat.server;
+package com.example.websocket_chat;
 
 
-import com.example.websocket_chat.common.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

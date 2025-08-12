@@ -1,6 +1,4 @@
-package com.example.websocket_chat.client;
-
-import com.example.websocket_chat.common.Message;
+package com.example.websocket_chat;
 
 import java.util.ArrayList;
 

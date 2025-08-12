@@ -1,4 +1,4 @@
-package com.example.websocket_chat.common;
+package com.example.websocket_chat;
 
 public class Message {
 

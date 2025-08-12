@@ -1,4 +1,4 @@
-package com.example.websocket_chat.client;
+package com.example.websocket_chat;
 
 import javax.swing.*;
 import java.util.concurrent.ExecutionException;

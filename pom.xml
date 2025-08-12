@@ -8,10 +8,13 @@
 		<version>3.5.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.example</groupId>
 	<artifactId>websocket_chat</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>websocket_chat</name>
+	<packaging>pom</packaging>
+
 	<description>Project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -27,69 +30,39 @@
 		<url/>
 	</scm>
 
+	<modules>
+		<module>client</module>
+		<module>common</module>
+		<module>server</module>
+	</modules>
+
 
 	<properties>
 		<java.version>21</java.version>
 	</properties>
 
-<!--	<dependencies>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-web</artifactId>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-websocket</artifactId>-->
-<!--		</dependency>-->
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-devtools</artifactId>-->
-<!--			<scope>runtime</scope>-->
-<!--			<optional>true</optional>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-test</artifactId>-->
-<!--			<scope>test</scope>-->
-<!--		</dependency>-->
-<!--	</dependencies>-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
-
-<!--	<build>-->
-<!--		<plugins>-->
-<!--			&lt;!&ndash; Spring Boot Maven Plugin (главный плагин для сборки) &ndash;&gt;-->
-<!--			<plugin>-->
-<!--				<groupId>org.springframework.boot</groupId>-->
-<!--				<artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--				<configuration>-->
-<!--					<mainClass>com.example.websocket_chat.client.App</mainClass>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
-
-<!--		</plugins>-->
-<!--	</build>-->
-
-<!--	<build>-->
-<!--		<plugins>-->
-<!--			&lt;!&ndash; Maven Compiler Plugin - исключаем пакет client &ndash;&gt;-->
-<!--			<plugin>-->
-<!--				<groupId>org.apache.maven.plugins</groupId>-->
-<!--				<artifactId>maven-compiler-plugin</artifactId>-->
-<!--				<version>3.11.0</version>-->
-<!--				<configuration>-->
-<!--					<excludes>-->
-<!--						<exclude>com/example/websocket_chat/client/**</exclude>-->
-<!--					</excludes>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
-
-<!--			&lt;!&ndash; Spring Boot Maven Plugin (без exclude) &ndash;&gt;-->
-<!--			<plugin>-->
-<!--				<groupId>org.springframework.boot</groupId>-->
-<!--				<artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--			</plugin>-->
-<!--		</plugins>-->
-<!--	</build>-->
 </project>
 

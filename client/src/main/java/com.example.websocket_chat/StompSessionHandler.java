@@ -1,6 +1,5 @@
-package com.example.websocket_chat.client;
+package com.example.websocket_chat;
 
-import com.example.websocket_chat.common.Message;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;

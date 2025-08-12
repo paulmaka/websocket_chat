@@ -1,6 +1,5 @@
-package com.example.websocket_chat.client;
+package com.example.websocket_chat;
 
-import com.example.websocket_chat.common.Message;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -46,7 +45,7 @@ public class StompClient {
         StompSessionHandler sessionHandler = new StompSessionHandler(messageListener, username);
 
         // Адрес WebSocket сервера.
-        String url = "http://localhost/ws"; //TODO выенсти в CI/CD
+        String url = "http://localhost:8080/ws"; //TODO выенсти в CI/CD
 
         // Создание STOMP сессии с подключением к заданному серверу и передачей созданного обработчика.
         session = stompClient.connectAsync(url, sessionHandler).get();

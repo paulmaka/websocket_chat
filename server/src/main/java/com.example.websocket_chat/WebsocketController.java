@@ -1,9 +1,10 @@
 package com.example.websocket_chat;
 
 
+import dev.onvoid.webrtc.RTCIceCandidate;
+import dev.onvoid.webrtc.RTCSessionDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -13,12 +14,10 @@ import org.springframework.stereotype.Controller;
 public class WebsocketController {
 
     // Используется Websocket для отправки сообщений клиентам.
-    private final SimpMessagingTemplate messagingTemplate;
-    private final WebSocketSessionManager sessionManager;
+    private final WebsocketSessionManager sessionManager;
 
     @Autowired
-    public WebsocketController(SimpMessagingTemplate messagingTemplate, WebSocketSessionManager sessionManager) {
-        this.messagingTemplate = messagingTemplate;
+    public WebsocketController(WebsocketSessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 
@@ -33,8 +32,7 @@ public class WebsocketController {
     @MessageMapping("/message")
     public void handleMessage(Message message) {
         System.out.println("Received message from user: " + message.getUser() + ": " + message.getMessage());
-        messagingTemplate.convertAndSend("/topic/messages", message);
-        System.out.println("Sent message to /topic/messages: " + message.getUser() + ": " + message.getMessage());
+        sessionManager.broadcastNewMessage(message);
     }
 
     /**
@@ -70,5 +68,22 @@ public class WebsocketController {
     public void requestUsers() {
         sessionManager.broadcastActiveUsernames();
         System.out.println("Requesting Users");
+    }
+
+
+    /**
+     * Метод принимает description от клиента, собирающегося создать прямое подключение и рассылает всем пользователся,
+     * подписанным на /topic/peer
+     */
+    @MessageMapping("/description")
+    public void handleDescription(RTCSessionDescription description) {
+        sessionManager.broadcastDescriptions(description);
+        System.out.println("Handling description");
+    }
+
+    @MessageMapping("/candidate")
+    public void handleICECandidates(RTCIceCandidate candidate) {
+        sessionManager.broadcastICECandidate(candidate);
+        System.out.println("Handling ICE candidate");
     }
 }

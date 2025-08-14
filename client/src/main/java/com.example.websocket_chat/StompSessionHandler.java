@@ -1,5 +1,7 @@
 package com.example.websocket_chat;
 
+import dev.onvoid.webrtc.RTCIceCandidate;
+import dev.onvoid.webrtc.RTCSessionDescription;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -72,6 +74,48 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
             }
         });
         System.out.println("Client subscribed to /topic/users");
+
+        session.subscribe("/topic/descriptions", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return null;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof RTCSessionDescription) {
+                        RTCSessionDescription remoteDescription = (RTCSessionDescription) payload;
+                        messageListener.onDescriptionReceive(remoteDescription);
+                        System.out.println("Receive remote description: " + remoteDescription);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/descriptions");
+
+        session.subscribe("/topic/candidates", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return null;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof RTCIceCandidate) {
+                        RTCIceCandidate remoteCandidate = (RTCIceCandidate) payload;
+                        messageListener.onICECandidateReceive(remoteCandidate);
+                        System.out.println("Receive remote ICE candidate " + remoteCandidate);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/candidates");
 
         // Отправка сообщения на /app/connect, чтобы добавить нового пользователя в список
         session.send("/app/connect", username);

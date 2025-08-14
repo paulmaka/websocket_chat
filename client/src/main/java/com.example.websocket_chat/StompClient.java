@@ -1,5 +1,7 @@
 package com.example.websocket_chat;
 
+import dev.onvoid.webrtc.RTCIceCandidate;
+import dev.onvoid.webrtc.RTCSessionDescription;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -45,13 +47,16 @@ public class StompClient {
         StompSessionHandler sessionHandler = new StompSessionHandler(messageListener, username);
 
         // Адрес WebSocket сервера.
-        String url = "http://37.252.17.192:8080/ws"; //TODO выенсти в CI/CD
+        String url = "http://localhost:8080/ws"; //TODO выенсти в CI/CD
 
         // Создание STOMP сессии с подключением к заданному серверу и передачей созданного обработчика.
         session = stompClient.connectAsync(url, sessionHandler).get();
     }
 
-    // Отправляет объект message на /app/message
+    /** Отправляет объект message на /app/message
+     *
+     * @param message
+     */
     public void sendMessage(Message message) {
         try {
             session.send("/app/message", message);
@@ -69,6 +74,27 @@ public class StompClient {
     public void disconnectUser(String username) {
         session.send("/app/disconnect", username);
         System.out.println("Disconnect user: " + username);
+    }
+
+
+    /**
+     * Отправляет offer на /app/description
+     *
+     */
+    public void sendDescription(RTCSessionDescription description) {
+        session.send("/app/description", description);
+        System.out.println("Description has sent: " + description);
+    }
+
+
+    /**
+     * Отправляет ICE candidate на signaling server /app/candidate
+     *
+     */
+
+    public void sendCandidate(RTCIceCandidate candidate) {
+        session.send("/app/candidate", candidate);
+        System.out.println("ICE candidate has sent: " + candidate);
     }
 
 }

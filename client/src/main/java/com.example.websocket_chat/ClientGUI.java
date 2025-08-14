@@ -1,7 +1,8 @@
 package com.example.websocket_chat;
 
 
-import jdk.jshell.execution.Util;
+import dev.onvoid.webrtc.RTCIceCandidate;
+import dev.onvoid.webrtc.RTCSessionDescription;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -19,6 +20,8 @@ public class ClientGUI extends JFrame implements MessageListener{
     private StompClient stompClient;
     private String username;
     private JScrollPane messageScrollPane;
+    private PeerConnection connection;
+    private boolean voiceChatEnable = false;
 
     public ClientGUI(String username) throws ExecutionException, InterruptedException {
         super("User: " + username);
@@ -70,6 +73,8 @@ public class ClientGUI extends JFrame implements MessageListener{
         connectedUsersLabel.setForeground(Utilities.TEXT_COLOR);
 
         connectedUsersPanel.add(connectedUsersLabel);
+        JButton button = createVoiceChatButton();
+        connectedUsersLabel.add(button);
 
         add(connectedUsersPanel, BorderLayout.WEST);
     }
@@ -167,6 +172,31 @@ public class ClientGUI extends JFrame implements MessageListener{
         return chatMessage;
     }
 
+    private JButton createVoiceChatButton() {
+        // Создаем новую кнопку
+        JButton button = new JButton("Voice");
+        button.setBackground(Utilities.BUTTON_ENABLE);
+
+        // Добавляем обработчик событий
+        button.addActionListener(e -> {
+            // Этот код будет выполняться при нажатии на кнопку
+            if (voiceChatEnable) {
+                voiceChatEnable = false;
+                button.setText("Voice");
+                button.setBackground(Utilities.BUTTON_ENABLE);
+                disableVoiceChat();
+            } else {
+                voiceChatEnable = true;
+                button.setText("Close");
+                button.setBackground(Utilities.BUTTON_DISABLE);
+                enableVoiceChat();
+            }
+            System.out.println("Кнопка была нажата!");
+        });
+
+        return button;
+    }
+
     @Override
     public void onMessageReceive(Message message) {
         messagePanel.add(createChatMessageComponent(message));
@@ -207,6 +237,15 @@ public class ClientGUI extends JFrame implements MessageListener{
         repaint();
     }
 
+    @Override
+    public void onDescriptionReceive(RTCSessionDescription description) {
+        connection.receiveRemoteDescription(description);
+    }
+
+    @Override
+    public void onICECandidateReceive(RTCIceCandidate candidate) {
+        connection.receiveRemoteCandidate(candidate);
+    }
 
     private void updateMessageSize() {
         for (int i = 0; i < messagePanel.getComponents().length; i++) {
@@ -229,5 +268,17 @@ public class ClientGUI extends JFrame implements MessageListener{
         label.setText("<html><div style='width:" + (int)(0.60 * getWidth()) +
                 "px; white-space: normal; word-wrap: break-word;'>" +
                 rawText + "</div></html>");
+    }
+
+
+    private void enableVoiceChat() {
+        connection = new PeerConnection(stompClient);
+        connection.createAndSendDescription();
+        System.out.println("Voice chat enabled in GUI");
+    }
+
+    private void disableVoiceChat() {
+        connection.cleanup();
+        System.out.println("Voice chat disabled in GUI");
     }
 }

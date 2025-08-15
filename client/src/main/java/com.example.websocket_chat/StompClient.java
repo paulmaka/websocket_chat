@@ -97,4 +97,9 @@ public class StompClient {
         System.out.println("ICE candidate has sent: " + dto);
     }
 
+    public void requestRemoteCandidate(String username) {
+        session.send("/app/request-candidate", username);
+        System.out.println("Request candidate: " + username);
+    }
+
 }

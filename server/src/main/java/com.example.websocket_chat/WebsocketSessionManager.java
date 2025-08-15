@@ -8,10 +8,13 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class WebsocketSessionManager {
     private final ArrayList<String> activeUsernames = new ArrayList<>();
+    private final Map<String, RTCIceCandidateDTO> candidates = new HashMap<>();
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
@@ -48,7 +51,12 @@ public class WebsocketSessionManager {
 
 
     public void broadcastICECandidate(RTCIceCandidateDTO dto) {
+        candidates.put(dto.getUsername(), dto);
         messagingTemplate.convertAndSend("topic/candidates", dto);
         System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto);
+    }
+
+    public void requestCandidate(String username) {
+        messagingTemplate.convertAndSend("/topic/candidates", candidates.get(username));
     }
 }

@@ -22,6 +22,7 @@ public class ClientGUI extends JFrame implements MessageListener{
     private JScrollPane messageScrollPane;
     private PeerConnection connection;
     private boolean voiceChatEnable = false;
+    private RTCSessionDescriptionDTO offer;
 
     public ClientGUI(String username) throws ExecutionException, InterruptedException {
         super("User: " + username);
@@ -39,6 +40,7 @@ public class ClientGUI extends JFrame implements MessageListener{
                 if (option == JOptionPane.YES_OPTION) {
                     stompClient.disconnectUser(username);
                     ClientGUI.this.dispose();
+                    connection = null;
                 }
             }
         });
@@ -156,15 +158,15 @@ public class ClientGUI extends JFrame implements MessageListener{
         messageLabel.setFont(new Font("Inter", Font.PLAIN, 16));
         messageLabel.setForeground(Utilities.TEXT_COLOR);
 
-        if (username.equals(message.getUser())) {
-            usernameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-            messageLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-
-            messageLabel.setText("<html><div style='width:" + (0.60 * getWidth()) +
-                    "px; text-align:right'>" +
-                    message.getMessage() + "</div></html>");
-
-        }
+//        if (username.equals(message.getUser())) {
+//            usernameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+//            messageLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+//
+//            messageLabel.setText("<html><div style='width:" + (0.60 * getWidth()) +
+//                    "px; text-align:right'>" +
+//                    message.getMessage() + "</div></html>");
+//
+//        }
 
         chatMessage.add(usernameLabel);
         chatMessage.add(messageLabel);
@@ -239,7 +241,14 @@ public class ClientGUI extends JFrame implements MessageListener{
 
     @Override
     public void onDescriptionReceive(RTCSessionDescriptionDTO dto) {
-        connection.receiveRemoteDescription(dto);
+        try {
+            if (offer == null) {
+                offer = dto;
+                connection.receiveRemoteDescription(dto);
+            } else {
+                connection.receiveRemoteDescription(offer);
+            }
+        } catch (Exception e) {}
     }
 
     @Override
@@ -273,7 +282,11 @@ public class ClientGUI extends JFrame implements MessageListener{
 
     private void enableVoiceChat() {
         connection = new PeerConnection(stompClient, username);
-        connection.createAndSendDescription();
+        if (offer != null) {
+            connection.receiveRemoteDescription(offer);
+        } else {
+            connection.createAndSendDescription();
+        }
         System.out.println("Voice chat enabled in GUI");
     }
 

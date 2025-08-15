@@ -18,13 +18,13 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
         this.stompClient = stompClient;
         this.username = username;
 
-        List<AudioDevice> outputDevices = MediaDevices.getAudioRenderDevices();
-        if (!outputDevices.isEmpty()) {
-
-            System.out.println("Audio output set to: " + outputDevices.get(0).getName());
-        } else {
-            System.err.println("No audio output devices found!");
-        }
+//        List<AudioDevice> outputDevices = MediaDevices.getAudioRenderDevices();
+//        if (!outputDevices.isEmpty()) {
+//
+//            System.out.println("Audio output set to: " + outputDevices.get(0).getName());
+//        } else {
+//            System.err.println("No audio output devices found!");
+//        }
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
         System.out.println("Remote stream added: " + stream.id());
         for (AudioTrack track : stream.getAudioTracks()) {
             System.out.println("Remote audio track: " + track.getId());
-            track.setEnabled(true); // Включаем аудиотрек
+            track.setEnabled(true);
         }
     }
 
@@ -90,12 +90,22 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
     @Override
     public void onAddTrack(RTCRtpReceiver receiver, MediaStream[] mediaStreams) {
-        for (MediaStream stream : mediaStreams) {
-            for (AudioTrack track : stream.getAudioTracks()) {
-                System.out.println("Remote audio track received via onAddTrack: " + track.getId());
-                track.setEnabled(true); // Включаем воспроизведение
+        if (mediaStreams != null) {
+            for (MediaStream stream : mediaStreams) {
+                if (stream != null) {
+                    for (AudioTrack track : stream.getAudioTracks()) {
+                        System.out.println("Remote audio track via onAddTrack: " + track.getId());
+                        track.setEnabled(true);
+                    }
+                }
             }
         }
+//        for (MediaStream stream : mediaStreams) {
+//            for (AudioTrack track : stream.getAudioTracks()) {
+//                System.out.println("Remote audio track received via onAddTrack: " + track.getId());
+//                track.setEnabled(true); // Включаем воспроизведение
+//            }
+//        }
     }
 
     @Override
@@ -105,7 +115,13 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
     @Override
     public void onTrack(RTCRtpTransceiver transceiver) {
         MediaStreamTrack track = transceiver.getReceiver().getTrack();
-        System.out.println("Remote audio track received via onTrack: " + track.getId());
-        track.setEnabled(true);
+        System.out.println("Remote track via onTrack: " + track.getId());
+        if (track instanceof AudioTrack) {
+            ((AudioTrack) track).setEnabled(true); // Включаем воспроизведение
+        }
+//        MediaStreamTrack track = transceiver.getReceiver().getTrack();
+//        System.out.println("Remote audio track received via onTrack: " + track.getId());
+//        track.setEnabled(true);
     }
+
 }

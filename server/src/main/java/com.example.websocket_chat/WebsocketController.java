@@ -86,4 +86,10 @@ public class WebsocketController {
         sessionManager.broadcastICECandidate(dto);
         System.out.println("Handling ICE candidate");
     }
+
+    @MessageMapping("/request-candidate")
+    public void requestICECandidate(String username) {
+        sessionManager.requestCandidate(username);
+        System.out.println("Sent from server candidate: " + username);
+    }
 }

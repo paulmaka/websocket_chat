@@ -81,6 +81,19 @@ public class PeerConnection {
             RTCSessionDescription remoteDescription = new RTCSessionDescription(RTCSdpType.valueOf(dto.getType().toUpperCase()), dto.getSdp());
 
             if (dto.getType().equalsIgnoreCase("offer")) {
+                if (peerConnection.getLocalDescription() != null) {
+                    peerConnection.setLocalDescription(null, new SetSessionDescriptionObserver() {
+                        @Override
+                        public void onSuccess() {
+
+                        }
+
+                        @Override
+                        public void onFailure(String s) {
+
+                        }
+                    });
+                }
                 peerConnection.setRemoteDescription(remoteDescription, new SetSessionDescriptionObserver() {
                     @Override
                     public void onSuccess() {
@@ -92,6 +105,8 @@ public class PeerConnection {
                                     public void onSuccess() {
                                         RTCSessionDescriptionDTO dtoAnswer = new RTCSessionDescriptionDTO(answer.sdpType.name().toLowerCase(), answer.sdp, username);
                                         stompClient.sendDescription(dtoAnswer);
+                                        System.out.println("Local description has set.");
+                                        System.out.println("An answer has sent: " + dtoAnswer);
                                     }
                                     @Override
                                     public void onFailure(String error) {
@@ -104,6 +119,7 @@ public class PeerConnection {
                                 System.err.println("Failed to create answer: " + error);
                             }
                         });
+                        System.out.println("Remote description has set.");
                     }
                     @Override
                     public void onFailure(String error) {
@@ -123,11 +139,12 @@ public class PeerConnection {
                     }
                 });
             }
+            stompClient.requestRemoteCandidate(dto.getUsername());
         }
     }
 
     public void receiveRemoteCandidate(RTCIceCandidateDTO dto) {
-        if (!dto.getUsername().equals(username)) {
+        if (!dto.getUsername().equals(username) && peerConnection.getRemoteDescription() != null) {
             RTCIceCandidate remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), dto.getSdpMid());
             peerConnection.addIceCandidate(remoteCandidate);
             System.out.println("Remote ICE Candidate set successfully.");
@@ -161,7 +178,30 @@ public class PeerConnection {
     }
 
     public void cleanup() {
-        audioTrack.dispose();
+//        audioTrack.dispose();
+        peerConnection.setLocalDescription(null, new SetSessionDescriptionObserver() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onFailure(String s) {
+
+            }
+        });
+        peerConnection.setRemoteDescription(null, new SetSessionDescriptionObserver() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onFailure(String s) {
+
+            }
+        });
+
         peerConnection.close();
         factory.dispose();
     }

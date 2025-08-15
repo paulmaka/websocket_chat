@@ -20,11 +20,13 @@ public class PeerConnection {
     private List<AudioDevice> audioDevices;
     private List<String> streamIds;
     private AudioTrack audioTrack;
+    private String username;
 
-    public PeerConnection(StompClient stompClient) {
+    public PeerConnection(StompClient stompClient, String username) {
         factory = new PeerConnectionFactory();
         config = new RTCConfiguration();
         iceServer = new RTCIceServer();
+        this.username = username;
         this.stompClient = stompClient;
 
 
@@ -49,7 +51,7 @@ public class PeerConnection {
                     @Override
                     public void onSuccess() {
                         // Send the offer to the remote peer via your signaling channel
-                        RTCSessionDescriptionDTO dto = new RTCSessionDescriptionDTO(description.sdpType.name().toLowerCase(), description.sdp);
+                        RTCSessionDescriptionDTO dto = new RTCSessionDescriptionDTO(description.sdpType.name().toLowerCase(), description.sdp, username);
                         stompClient.sendDescription(dto);
                     }
 
@@ -68,18 +70,20 @@ public class PeerConnection {
     }
 
     public void receiveRemoteDescription(RTCSessionDescriptionDTO dto) {
-        RTCSessionDescription remoteDescription = new RTCSessionDescription(RTCSdpType.valueOf(dto.getType().toUpperCase()), dto.getSdp());
-        peerConnection.setRemoteDescription(remoteDescription, new SetSessionDescriptionObserver() {
-            @Override
-            public void onSuccess() {
-                System.out.println("Remote description set successfully");
-            }
+        if (!dto.getUsername().equals(username)) {
+            RTCSessionDescription remoteDescription = new RTCSessionDescription(RTCSdpType.valueOf(dto.getType().toUpperCase()), dto.getSdp());
+            peerConnection.setRemoteDescription(remoteDescription, new SetSessionDescriptionObserver() {
+                @Override
+                public void onSuccess() {
+                    System.out.println("Remote description set successfully");
+                }
 
-            @Override
-            public void onFailure(String error) {
-                System.err.println("Failed to set remote description: " + error);
-            }
-        });
+                @Override
+                public void onFailure(String error) {
+                    System.err.println("Failed to set remote description: " + error);
+                }
+            });
+        }
     }
 
     public void receiveRemoteCandidate(RTCIceCandidate candidate) {

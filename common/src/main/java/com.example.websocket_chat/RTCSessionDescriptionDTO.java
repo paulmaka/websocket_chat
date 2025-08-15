@@ -4,11 +4,13 @@ public class RTCSessionDescriptionDTO {
 
     private String type;
     private String sdp;
+    private String username;
 
     public RTCSessionDescriptionDTO() {}
-    public RTCSessionDescriptionDTO(String type, String sdp) {
+    public RTCSessionDescriptionDTO(String type, String sdp, String username) {
         this.sdp = sdp;
         this.type = type;
+        this.username = username;
     }
 
     public String getType() {
@@ -25,5 +27,13 @@ public class RTCSessionDescriptionDTO {
 
     public void setSdp(String sdp) {
         this.sdp = sdp;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

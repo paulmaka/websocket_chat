@@ -74,7 +74,7 @@ public class ClientGUI extends JFrame implements MessageListener{
 
         connectedUsersPanel.add(connectedUsersLabel);
         JButton button = createVoiceChatButton();
-        connectedUsersLabel.add(button);
+        connectedUsersPanel.add(button);
 
         add(connectedUsersPanel, BorderLayout.WEST);
     }
@@ -215,8 +215,8 @@ public class ClientGUI extends JFrame implements MessageListener{
      */
     @Override
     public void onActiveUsersUpdated(ArrayList<String> users) {
-        if (connectedUsersPanel.getComponents().length >= 2) {
-            connectedUsersPanel.remove(1);
+        if (connectedUsersPanel.getComponents().length >= 3) {
+            connectedUsersPanel.remove(2);
         }
 
         JPanel userListPanel = new JPanel();
@@ -238,8 +238,8 @@ public class ClientGUI extends JFrame implements MessageListener{
     }
 
     @Override
-    public void onDescriptionReceive(RTCSessionDescription description) {
-        connection.receiveRemoteDescription(description);
+    public void onDescriptionReceive(RTCSessionDescriptionDTO dto) {
+        connection.receiveRemoteDescription(dto);
     }
 
     @Override

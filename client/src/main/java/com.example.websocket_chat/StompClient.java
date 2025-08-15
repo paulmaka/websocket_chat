@@ -47,7 +47,7 @@ public class StompClient {
         StompSessionHandler sessionHandler = new StompSessionHandler(messageListener, username);
 
         // Адрес WebSocket сервера.
-        String url = "http://localhost:8080/ws"; //TODO выенсти в CI/CD
+        String url = "http://localhost:80/ws"; //TODO выенсти в CI/CD
 
         // Создание STOMP сессии с подключением к заданному серверу и передачей созданного обработчика.
         session = stompClient.connectAsync(url, sessionHandler).get();
@@ -81,9 +81,9 @@ public class StompClient {
      * Отправляет offer на /app/description
      *
      */
-    public void sendDescription(RTCSessionDescription description) {
-        session.send("/app/description", description);
-        System.out.println("Description has sent: " + description);
+    public void sendDescription(RTCSessionDescriptionDTO dto) {
+        session.send("/app/description", dto);
+        System.out.println("Description has sent: " + dto);
     }
 
 

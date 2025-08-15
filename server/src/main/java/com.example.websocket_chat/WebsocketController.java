@@ -76,8 +76,8 @@ public class WebsocketController {
      * подписанным на /topic/peer
      */
     @MessageMapping("/description")
-    public void handleDescription(RTCSessionDescription description) {
-        sessionManager.broadcastDescriptions(description);
+    public void handleDescription(RTCSessionDescriptionDTO dto) {
+        sessionManager.broadcastDescriptions(dto);
         System.out.println("Handling description");
     }
 

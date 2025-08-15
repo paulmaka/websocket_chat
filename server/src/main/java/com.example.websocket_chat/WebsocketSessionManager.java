@@ -41,9 +41,9 @@ public class WebsocketSessionManager {
     }
 
 
-    public void broadcastDescriptions(RTCSessionDescription description) {
-        messagingTemplate.convertAndSend("/topic/descriptions", description);
-        System.out.println("Broadcasting description to /topic/descriptions " + description);
+    public void broadcastDescriptions(RTCSessionDescriptionDTO dto) {
+        messagingTemplate.convertAndSend("/topic/descriptions", dto);
+        System.out.println("Broadcasting description to /topic/descriptions " + dto);
     }
 
 

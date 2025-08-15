@@ -78,16 +78,16 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
         session.subscribe("/topic/descriptions", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return null;
+                return new RTCSessionDescriptionDTO().getClass();
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 try {
-                    if (payload instanceof RTCSessionDescription) {
-                        RTCSessionDescription remoteDescription = (RTCSessionDescription) payload;
-                        messageListener.onDescriptionReceive(remoteDescription);
-                        System.out.println("Receive remote description: " + remoteDescription);
+                    if (payload instanceof RTCSessionDescriptionDTO) {
+                        RTCSessionDescriptionDTO dto = (RTCSessionDescriptionDTO) payload;
+                        messageListener.onDescriptionReceive(dto);
+                        System.out.println("Receive remote description: " + dto);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

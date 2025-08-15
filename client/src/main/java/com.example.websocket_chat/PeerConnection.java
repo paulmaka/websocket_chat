@@ -49,7 +49,8 @@ public class PeerConnection {
                     @Override
                     public void onSuccess() {
                         // Send the offer to the remote peer via your signaling channel
-                        stompClient.sendDescription(description);
+                        RTCSessionDescriptionDTO dto = new RTCSessionDescriptionDTO(description.sdpType.name().toLowerCase(), description.sdp);
+                        stompClient.sendDescription(dto);
                     }
 
                     @Override
@@ -66,7 +67,8 @@ public class PeerConnection {
         });
     }
 
-    public void receiveRemoteDescription(RTCSessionDescription remoteDescription) {
+    public void receiveRemoteDescription(RTCSessionDescriptionDTO dto) {
+        RTCSessionDescription remoteDescription = new RTCSessionDescription(RTCSdpType.valueOf(dto.getType().toUpperCase()), dto.getSdp());
         peerConnection.setRemoteDescription(remoteDescription, new SetSessionDescriptionObserver() {
             @Override
             public void onSuccess() {

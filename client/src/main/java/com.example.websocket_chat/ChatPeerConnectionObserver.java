@@ -6,9 +6,11 @@ import dev.onvoid.webrtc.media.MediaStream;
 public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
     private StompClient stompClient;
+    private String username;
 
-    public ChatPeerConnectionObserver(StompClient stompClient) {
+    public ChatPeerConnectionObserver(StompClient stompClient, String username) {
         this.stompClient = stompClient;
+        this.username = username;
     }
 
     @Override
@@ -39,7 +41,8 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
     @Override
     public void onIceCandidate(RTCIceCandidate candidate) {
         // Send the ICE candidate to the remote peer via your signaling channel
-        stompClient.sendCandidate(candidate);
+        RTCIceCandidateDTO dto = new RTCIceCandidateDTO(candidate.sdp, candidate.sdpMid, candidate.sdpMLineIndex, username);
+        stompClient.sendCandidate(dto);
     }
 
     @Override

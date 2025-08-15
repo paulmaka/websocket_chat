@@ -34,9 +34,11 @@ public class PeerConnection {
         config.iceServers.add(iceServer);
 
         // Create a peer connection with an observer to handle events
-        PeerConnectionObserver peerConnectionObserver = new ChatPeerConnectionObserver(stompClient);
+        PeerConnectionObserver peerConnectionObserver = new ChatPeerConnectionObserver(stompClient, username);
         peerConnection = factory.createPeerConnection(config, peerConnectionObserver);
         getAudioDevices();
+        createAudioSourceAndTracks();
+        addTracksToPeerConnection();
     }
 
     public void createAndSendDescription() {
@@ -86,10 +88,11 @@ public class PeerConnection {
         }
     }
 
-    public void receiveRemoteCandidate(RTCIceCandidate candidate) {
-        peerConnection.addIceCandidate(candidate);
-        createAudioSourceAndTracks();
-        addTracksToPeerConnection();
+    public void receiveRemoteCandidate(RTCIceCandidateDTO dto) {
+        if (!dto.getUsername().equals(username)) {
+            RTCIceCandidate remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), dto.getSdpMid());
+            peerConnection.addIceCandidate(remoteCandidate);
+        }
     }
 
     private void getAudioDevices() {

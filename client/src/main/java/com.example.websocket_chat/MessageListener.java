@@ -10,5 +10,5 @@ public interface MessageListener {
     void onMessageReceive(Message message);
     void onActiveUsersUpdated(ArrayList<String> users);
     void onDescriptionReceive(RTCSessionDescriptionDTO dto);
-    void onICECandidateReceive(RTCIceCandidate candidate);
+    void onICECandidateReceive(RTCIceCandidateDTO dto);
 }

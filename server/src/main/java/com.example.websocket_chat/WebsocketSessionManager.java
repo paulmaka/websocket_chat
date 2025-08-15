@@ -47,8 +47,8 @@ public class WebsocketSessionManager {
     }
 
 
-    public void broadcastICECandidate(RTCIceCandidate candidate) {
-        messagingTemplate.convertAndSend("topic/candidates", candidate);
-        System.out.println("Broadcasting ICE candidate to /topic/candidates " + candidate);
+    public void broadcastICECandidate(RTCIceCandidateDTO dto) {
+        messagingTemplate.convertAndSend("topic/candidates", dto);
+        System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto);
     }
 }

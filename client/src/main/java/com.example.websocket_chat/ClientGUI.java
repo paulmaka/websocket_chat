@@ -243,8 +243,8 @@ public class ClientGUI extends JFrame implements MessageListener{
     }
 
     @Override
-    public void onICECandidateReceive(RTCIceCandidate candidate) {
-        connection.receiveRemoteCandidate(candidate);
+    public void onICECandidateReceive(RTCIceCandidateDTO dto) {
+        connection.receiveRemoteCandidate(dto);
     }
 
     private void updateMessageSize() {

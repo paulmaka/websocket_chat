@@ -92,9 +92,9 @@ public class StompClient {
      *
      */
 
-    public void sendCandidate(RTCIceCandidate candidate) {
-        session.send("/app/candidate", candidate);
-        System.out.println("ICE candidate has sent: " + candidate);
+    public void sendCandidate(RTCIceCandidateDTO dto) {
+        session.send("/app/candidate", dto);
+        System.out.println("ICE candidate has sent: " + dto);
     }
 
 }

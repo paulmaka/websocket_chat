@@ -82,8 +82,8 @@ public class WebsocketController {
     }
 
     @MessageMapping("/candidate")
-    public void handleICECandidates(RTCIceCandidate candidate) {
-        sessionManager.broadcastICECandidate(candidate);
+    public void handleICECandidates(RTCIceCandidateDTO dto) {
+        sessionManager.broadcastICECandidate(dto);
         System.out.println("Handling ICE candidate");
     }
 }

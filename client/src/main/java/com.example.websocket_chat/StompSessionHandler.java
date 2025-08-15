@@ -99,16 +99,16 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
         session.subscribe("/topic/candidates", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return null;
+                return new RTCIceCandidateDTO().getClass();
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 try {
-                    if (payload instanceof RTCIceCandidate) {
-                        RTCIceCandidate remoteCandidate = (RTCIceCandidate) payload;
-                        messageListener.onICECandidateReceive(remoteCandidate);
-                        System.out.println("Receive remote ICE candidate " + remoteCandidate);
+                    if (payload instanceof RTCIceCandidateDTO) {
+                        RTCIceCandidateDTO dto = (RTCIceCandidateDTO) payload;
+                        messageListener.onICECandidateReceive(dto);
+                        System.out.println("Receive remote ICE candidate " + dto);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

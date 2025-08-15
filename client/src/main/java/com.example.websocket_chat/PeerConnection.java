@@ -66,6 +66,7 @@ public class PeerConnection {
                         System.err.println("Failed to set local description: " + error);
                     }
                 });
+                System.out.println("Local description set successfully.");
             }
 
             @Override
@@ -78,17 +79,50 @@ public class PeerConnection {
     public void receiveRemoteDescription(RTCSessionDescriptionDTO dto) {
         if (!dto.getUsername().equals(username)) {
             RTCSessionDescription remoteDescription = new RTCSessionDescription(RTCSdpType.valueOf(dto.getType().toUpperCase()), dto.getSdp());
-            peerConnection.setRemoteDescription(remoteDescription, new SetSessionDescriptionObserver() {
-                @Override
-                public void onSuccess() {
-                    System.out.println("Remote description set successfully");
-                }
 
-                @Override
-                public void onFailure(String error) {
-                    System.err.println("Failed to set remote description: " + error);
-                }
-            });
+            if (dto.getType().equalsIgnoreCase("offer")) {
+                peerConnection.setRemoteDescription(remoteDescription, new SetSessionDescriptionObserver() {
+                    @Override
+                    public void onSuccess() {
+                        peerConnection.createAnswer(new RTCAnswerOptions(), new CreateSessionDescriptionObserver() {
+                            @Override
+                            public void onSuccess(RTCSessionDescription answer) {
+                                peerConnection.setLocalDescription(answer, new SetSessionDescriptionObserver() {
+                                    @Override
+                                    public void onSuccess() {
+                                        RTCSessionDescriptionDTO dtoAnswer = new RTCSessionDescriptionDTO(answer.sdpType.name().toLowerCase(), answer.sdp, username);
+                                        stompClient.sendDescription(dtoAnswer);
+                                    }
+                                    @Override
+                                    public void onFailure(String error) {
+                                        System.err.println("Failed to set local description: " + error);
+                                    }
+                                });
+                            }
+                            @Override
+                            public void onFailure(String error) {
+                                System.err.println("Failed to create answer: " + error);
+                            }
+                        });
+                    }
+                    @Override
+                    public void onFailure(String error) {
+                        System.err.println("Failed to set remote description: " + error);
+                    }
+                });
+            } else {
+                peerConnection.setRemoteDescription(remoteDescription, new SetSessionDescriptionObserver() {
+                    @Override
+                    public void onSuccess() {
+                        System.out.println("Remote description set successfully");
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        System.err.println("Failed to set remote description: " + error);
+                    }
+                });
+            }
         }
     }
 
@@ -96,6 +130,7 @@ public class PeerConnection {
         if (!dto.getUsername().equals(username)) {
             RTCIceCandidate remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), dto.getSdpMid());
             peerConnection.addIceCandidate(remoteCandidate);
+            System.out.println("Remote ICE Candidate set successfully.");
         }
     }
 

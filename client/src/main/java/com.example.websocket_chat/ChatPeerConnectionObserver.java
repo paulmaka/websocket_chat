@@ -1,7 +1,13 @@
 package com.example.websocket_chat;
 
 import dev.onvoid.webrtc.*;
+import dev.onvoid.webrtc.media.MediaDevices;
 import dev.onvoid.webrtc.media.MediaStream;
+import dev.onvoid.webrtc.media.MediaStreamTrack;
+import dev.onvoid.webrtc.media.audio.AudioDevice;
+import dev.onvoid.webrtc.media.audio.AudioTrack;
+
+import java.util.List;
 
 public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
@@ -11,6 +17,14 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
     public ChatPeerConnectionObserver(StompClient stompClient, String username) {
         this.stompClient = stompClient;
         this.username = username;
+
+        List<AudioDevice> outputDevices = MediaDevices.getAudioRenderDevices();
+        if (!outputDevices.isEmpty()) {
+
+            System.out.println("Audio output set to: " + outputDevices.get(0).getName());
+        } else {
+            System.err.println("No audio output devices found!");
+        }
     }
 
     @Override
@@ -55,6 +69,11 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
     @Override
     public void onAddStream(MediaStream stream) {
+        System.out.println("Remote stream added: " + stream.id());
+        for (AudioTrack track : stream.getAudioTracks()) {
+            System.out.println("Remote audio track: " + track.getId());
+            track.setEnabled(true); // Включаем аудиотрек
+        }
     }
 
     @Override
@@ -71,6 +90,12 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
     @Override
     public void onAddTrack(RTCRtpReceiver receiver, MediaStream[] mediaStreams) {
+        for (MediaStream stream : mediaStreams) {
+            for (AudioTrack track : stream.getAudioTracks()) {
+                System.out.println("Remote audio track received via onAddTrack: " + track.getId());
+                track.setEnabled(true); // Включаем воспроизведение
+            }
+        }
     }
 
     @Override
@@ -79,5 +104,8 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
     @Override
     public void onTrack(RTCRtpTransceiver transceiver) {
+        MediaStreamTrack track = transceiver.getReceiver().getTrack();
+        System.out.println("Remote audio track received via onTrack: " + track.getId());
+        track.setEnabled(true);
     }
 }

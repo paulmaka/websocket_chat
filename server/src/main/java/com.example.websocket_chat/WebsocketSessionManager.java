@@ -12,6 +12,8 @@ import java.util.ArrayList;
 @Service
 public class WebsocketSessionManager {
     private final ArrayList<String> activeUsernames = new ArrayList<>();
+    private final ArrayList<RTCSessionDescriptionDTO> descriptions = new ArrayList<>();
+    private final ArrayList<RTCIceCandidateDTO> candidates = new ArrayList<>();
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
@@ -41,14 +43,26 @@ public class WebsocketSessionManager {
     }
 
 
-    public void broadcastDescriptions(RTCSessionDescriptionDTO dto) {
-        messagingTemplate.convertAndSend("/topic/descriptions", dto);
-        System.out.println("Broadcasting description to /topic/descriptions " + dto);
+    public void addDescription(RTCSessionDescriptionDTO dto) {
+        descriptions.add(dto);
+    }
+
+    public void addICECandidate(RTCIceCandidateDTO dto) {
+        candidates.add(dto);
+    }
+
+    public void broadcastDescriptions() {
+        for (RTCSessionDescriptionDTO dto : descriptions) {
+            messagingTemplate.convertAndSend("/topic/descriptions", dto);
+            System.out.println("Broadcasting description to /topic/descriptions " + dto);
+        }
     }
 
 
-    public void broadcastICECandidate(RTCIceCandidateDTO dto) {
-        messagingTemplate.convertAndSend("topic/candidates", dto);
-        System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto);
+    public void broadcastICECandidate() {
+        for (RTCIceCandidateDTO dto : candidates) {
+            messagingTemplate.convertAndSend("topic/candidates", dto);
+            System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto);
+        }
     }
 }

@@ -96,5 +96,14 @@ public class StompClient {
         session.send("/app/candidate", dto);
         System.out.println("ICE candidate has sent: " + dto);
     }
+    public void requestDescription() {
+        session.send("/app/request-description", "");
+        System.out.println("Request description has sent");
+    }
+
+    public void requestICECandidate() {
+        session.send("/app/request-candidates", "");
+        System.out.println("Request candidates has sent");
+    }
 
 }

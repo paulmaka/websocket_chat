@@ -32,6 +32,10 @@ public class PeerConnection {
 
         iceServer.urls.add("stun:stun.l.google.com:19302");
         config.iceServers.add(iceServer);
+        config.iceTransportPolicy = RTCIceTransportPolicy.ALL;
+        config.bundlePolicy = RTCBundlePolicy.BALANCED;
+        config.rtcpMuxPolicy = RTCRtcpMuxPolicy.REQUIRE;
+
 
         // Create a peer connection with an observer to handle events
         PeerConnectionObserver peerConnectionObserver = new ChatPeerConnectionObserver(stompClient, username);

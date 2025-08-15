@@ -274,6 +274,8 @@ public class ClientGUI extends JFrame implements MessageListener{
     private void enableVoiceChat() {
         connection = new PeerConnection(stompClient, username);
         connection.createAndSendDescription();
+        stompClient.requestDescription();
+        stompClient.requestICECandidate();
         System.out.println("Voice chat enabled in GUI");
     }
 

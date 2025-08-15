@@ -77,13 +77,25 @@ public class WebsocketController {
      */
     @MessageMapping("/description")
     public void handleDescription(RTCSessionDescriptionDTO dto) {
-        sessionManager.broadcastDescriptions(dto);
-        System.out.println("Handling description");
+        sessionManager.addDescription(dto);
+        System.out.println("Adding description");
     }
 
     @MessageMapping("/candidate")
     public void handleICECandidates(RTCIceCandidateDTO dto) {
-        sessionManager.broadcastICECandidate(dto);
-        System.out.println("Handling ICE candidate");
+        sessionManager.addICECandidate(dto);
+        System.out.println("Adding ICE candidate");
+    }
+
+    @MessageMapping("/request-description")
+    public void requestDescription() {
+        sessionManager.broadcastDescriptions();
+        System.out.println("Broadcasting description");
+    }
+
+    @MessageMapping("/request-candidates")
+    public void requestICECandidate() {
+        sessionManager.broadcastICECandidate();
+        System.out.println("Broadcasting ICE candidate");
     }
 }

@@ -126,12 +126,10 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 try {
-                    if (payload != null) {
-                        if (payload instanceof RTCSessionDescriptionDTO) {
-                            RTCSessionDescriptionDTO dto = (RTCSessionDescriptionDTO) payload;
-                            messageListener.onOfferReceive(dto);
-                            System.out.println("Receive remote offer: " + dto);
-                        }
+                    if (payload instanceof RTCSessionDescriptionDTO) {
+                        RTCSessionDescriptionDTO dto = (RTCSessionDescriptionDTO) payload;
+                        messageListener.onOfferReceive(dto);
+                        System.out.println("Receive remote offer: " + dto);
                     } else {
                         System.out.println("Offer is null!!!");
                         messageListener.onNullOfferReceive();

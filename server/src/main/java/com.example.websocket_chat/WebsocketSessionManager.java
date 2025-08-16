@@ -66,7 +66,7 @@ public class WebsocketSessionManager {
 
     public void requestOfferDescription() {
         if (offer == null) {
-            messagingTemplate.convertAndSend("/topic/offers", (Object) null);
+            messagingTemplate.convertAndSend("/topic/offers", "null");
         } else {
             messagingTemplate.convertAndSend("/topic/offers", offer);
         }

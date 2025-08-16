@@ -22,7 +22,6 @@ public class ClientGUI extends JFrame implements MessageListener{
     private JScrollPane messageScrollPane;
     private PeerConnection connection;
     private boolean voiceChatEnable = false;
-    private RTCSessionDescriptionDTO offer;
 
     public ClientGUI(String username) throws ExecutionException, InterruptedException {
         super("User: " + username);
@@ -240,15 +239,24 @@ public class ClientGUI extends JFrame implements MessageListener{
     }
 
     @Override
-    public void onDescriptionReceive(RTCSessionDescriptionDTO dto) {
+    public void onAnswerReceive(RTCSessionDescriptionDTO dto) {
         try {
-            if (offer == null) {
-                offer = dto;
-                connection.receiveRemoteDescription(dto);
-            } else {
-                connection.receiveRemoteDescription(offer);
-            }
+            connection.receiveRemoteDescription(dto);
         } catch (Exception e) {}
+    }
+
+    @Override
+    public void onOfferReceive(RTCSessionDescriptionDTO dto) {
+        try {
+            connection.receiveRemoteDescription(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onNullOfferReceive() {
+        connection.createAndSendDescription();
     }
 
     @Override
@@ -282,11 +290,7 @@ public class ClientGUI extends JFrame implements MessageListener{
 
     private void enableVoiceChat() {
         connection = new PeerConnection(stompClient, username);
-        if (offer != null) {
-            connection.receiveRemoteDescription(offer);
-        } else {
-            connection.createAndSendDescription();
-        }
+        stompClient.requestRemoteDescription();
         System.out.println("Voice chat enabled in GUI");
     }
 

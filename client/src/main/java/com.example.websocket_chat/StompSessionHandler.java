@@ -75,7 +75,7 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
         });
         System.out.println("Client subscribed to /topic/users");
 
-        session.subscribe("/topic/descriptions", new StompFrameHandler() {
+        session.subscribe("/topic/answers", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return new RTCSessionDescriptionDTO().getClass();
@@ -86,15 +86,15 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
                 try {
                     if (payload instanceof RTCSessionDescriptionDTO) {
                         RTCSessionDescriptionDTO dto = (RTCSessionDescriptionDTO) payload;
-                        messageListener.onDescriptionReceive(dto);
-                        System.out.println("Receive remote description: " + dto);
+                        messageListener.onAnswerReceive(dto);
+                        System.out.println("Receive remote answers: " + dto);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
-        System.out.println("Client subscribed to /topic/descriptions");
+        System.out.println("Client subscribed to /topic/answers");
 
         session.subscribe("/topic/candidates", new StompFrameHandler() {
             @Override
@@ -116,6 +116,32 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
             }
         });
         System.out.println("Client subscribed to /topic/candidates");
+
+        session.subscribe("/topic/offers", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return new RTCSessionDescriptionDTO().getClass();
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload != null) {
+                        if (payload instanceof RTCSessionDescriptionDTO) {
+                            RTCSessionDescriptionDTO dto = (RTCSessionDescriptionDTO) payload;
+                            messageListener.onOfferReceive(dto);
+                            System.out.println("Receive remote offer: " + dto);
+                        }
+                    } else {
+                        System.out.println("Offer is null!!!");
+                        messageListener.onNullOfferReceive();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/offers");
 
         // Отправка сообщения на /app/connect, чтобы добавить нового пользователя в список
         session.send("/app/connect", username);

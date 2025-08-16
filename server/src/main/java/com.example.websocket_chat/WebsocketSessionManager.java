@@ -15,6 +15,7 @@ import java.util.Map;
 public class WebsocketSessionManager {
     private final ArrayList<String> activeUsernames = new ArrayList<>();
     private final Map<String, RTCIceCandidateDTO> candidates = new HashMap<>();
+    private RTCSessionDescriptionDTO offer = null;
     private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
@@ -44,11 +45,14 @@ public class WebsocketSessionManager {
     }
 
 
-    public void broadcastDescriptions(RTCSessionDescriptionDTO dto) {
-        messagingTemplate.convertAndSend("/topic/descriptions", dto);
-        System.out.println("Broadcasting description to /topic/descriptions " + dto);
+    public void setOfferDescription(RTCSessionDescriptionDTO dto) {
+        offer = dto;
     }
 
+    public void broadcastAnswer(RTCSessionDescriptionDTO dto) {
+        messagingTemplate.convertAndSend("/topic/answers", dto);
+        System.out.println("Broadcasting answer to /topic/answers " + dto);
+    }
 
     public void broadcastICECandidate(RTCIceCandidateDTO dto) {
         candidates.put(dto.getUsername(), dto);
@@ -58,5 +62,13 @@ public class WebsocketSessionManager {
 
     public void requestCandidate(String username) {
         messagingTemplate.convertAndSend("/topic/candidates", candidates.get(username));
+    }
+
+    public void requestOfferDescription() {
+        if (offer == null) {
+            messagingTemplate.convertAndSend("/topic/offers", (Object) null);
+        } else {
+            messagingTemplate.convertAndSend("/topic/offers", offer);
+        }
     }
 }

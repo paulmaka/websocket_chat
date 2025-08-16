@@ -75,10 +75,16 @@ public class WebsocketController {
      * Метод принимает description от клиента, собирающегося создать прямое подключение и рассылает всем пользователся,
      * подписанным на /topic/peer
      */
-    @MessageMapping("/description")
-    public void handleDescription(RTCSessionDescriptionDTO dto) {
-        sessionManager.broadcastDescriptions(dto);
-        System.out.println("Handling description");
+    @MessageMapping("/offer")
+    public void handleOfferDescription(RTCSessionDescriptionDTO dto) {
+        sessionManager.setOfferDescription(dto);
+        System.out.println("Handling offer description");
+    }
+
+    @MessageMapping("/answer")
+    public void handleAnswerDescription(RTCSessionDescriptionDTO dto) {
+        sessionManager.broadcastAnswer(dto);
+        System.out.println("Handling answer description");
     }
 
     @MessageMapping("/candidate")
@@ -91,5 +97,11 @@ public class WebsocketController {
     public void requestICECandidate(String username) {
         sessionManager.requestCandidate(username);
         System.out.println("Sent from server candidate: " + username);
+    }
+
+    @MessageMapping("/request-offer")
+    public void requestDescription() {
+        sessionManager.requestOfferDescription();
+        System.out.println("Sent from server offer description.");
     }
 }

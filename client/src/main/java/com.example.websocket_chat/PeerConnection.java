@@ -58,7 +58,7 @@ public class PeerConnection {
                     public void onSuccess() {
                         // Send the offer to the remote peer via your signaling channel
                         RTCSessionDescriptionDTO dto = new RTCSessionDescriptionDTO(description.sdpType.name().toLowerCase(), description.sdp, username);
-                        stompClient.sendDescription(dto);
+                        stompClient.sendOfferDescription(dto);
                     }
 
                     @Override
@@ -81,19 +81,6 @@ public class PeerConnection {
             RTCSessionDescription remoteDescription = new RTCSessionDescription(RTCSdpType.valueOf(dto.getType().toUpperCase()), dto.getSdp());
 
             if (dto.getType().equalsIgnoreCase("offer")) {
-                if (peerConnection.getLocalDescription() != null) {
-                    peerConnection.setLocalDescription(null, new SetSessionDescriptionObserver() {
-                        @Override
-                        public void onSuccess() {
-
-                        }
-
-                        @Override
-                        public void onFailure(String s) {
-
-                        }
-                    });
-                }
                 peerConnection.setRemoteDescription(remoteDescription, new SetSessionDescriptionObserver() {
                     @Override
                     public void onSuccess() {
@@ -104,7 +91,7 @@ public class PeerConnection {
                                     @Override
                                     public void onSuccess() {
                                         RTCSessionDescriptionDTO dtoAnswer = new RTCSessionDescriptionDTO(answer.sdpType.name().toLowerCase(), answer.sdp, username);
-                                        stompClient.sendDescription(dtoAnswer);
+                                        stompClient.sendAnswerDescription(dtoAnswer);
                                         System.out.println("Local description has set.");
                                         System.out.println("An answer has sent: " + dtoAnswer);
                                     }
@@ -179,29 +166,6 @@ public class PeerConnection {
 
     public void cleanup() {
 //        audioTrack.dispose();
-        peerConnection.setLocalDescription(null, new SetSessionDescriptionObserver() {
-            @Override
-            public void onSuccess() {
-
-            }
-
-            @Override
-            public void onFailure(String s) {
-
-            }
-        });
-        peerConnection.setRemoteDescription(null, new SetSessionDescriptionObserver() {
-            @Override
-            public void onSuccess() {
-
-            }
-
-            @Override
-            public void onFailure(String s) {
-
-            }
-        });
-
         peerConnection.close();
         factory.dispose();
     }

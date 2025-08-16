@@ -56,7 +56,7 @@ public class WebsocketSessionManager {
 
     public void broadcastICECandidate(RTCIceCandidateDTO dto) {
         candidates.put(dto.getUsername(), dto);
-        messagingTemplate.convertAndSend("topic/candidates", dto);
+        messagingTemplate.convertAndSend("/topic/candidates", dto);
         System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto);
     }
 
@@ -66,9 +66,11 @@ public class WebsocketSessionManager {
 
     public void requestOfferDescription() {
         if (offer == null) {
-            messagingTemplate.convertAndSend("/topic/offers", "null");
+            messagingTemplate.convertAndSend("/topic/null-offer", "null");
+            System.out.println("Sent from server null offer description.");
         } else {
             messagingTemplate.convertAndSend("/topic/offers", offer);
+            System.out.println("Sent from server offer description: " + offer);
         }
     }
 }

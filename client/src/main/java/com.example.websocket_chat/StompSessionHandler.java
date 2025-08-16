@@ -78,7 +78,7 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
         session.subscribe("/topic/answers", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return new RTCSessionDescriptionDTO().getClass();
+                return RTCSessionDescriptionDTO.class;
             }
 
             @Override
@@ -99,7 +99,7 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
         session.subscribe("/topic/candidates", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return new RTCIceCandidateDTO().getClass();
+                return RTCIceCandidateDTO.class;
             }
 
             @Override
@@ -120,19 +120,15 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
         session.subscribe("/topic/offers", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return new RTCSessionDescriptionDTO().getClass();
+                return RTCSessionDescriptionDTO.class;
             }
-
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 try {
                     if (payload instanceof RTCSessionDescriptionDTO) {
                         RTCSessionDescriptionDTO dto = (RTCSessionDescriptionDTO) payload;
-                        messageListener.onOfferReceive(dto);
                         System.out.println("Receive remote offer: " + dto);
-                    } else {
-                        System.out.println("Offer is null!!!");
-                        messageListener.onNullOfferReceive();
+                        messageListener.onOfferReceive(dto);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -140,6 +136,27 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
             }
         });
         System.out.println("Client subscribed to /topic/offers");
+
+        session.subscribe("/topic/null-offer", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return String.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof String) {
+                        String str = (String) payload;
+                        System.out.println("Offer is " + str + " !!!");
+                        messageListener.onNullOfferReceive();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/null-offer");
 
         // Отправка сообщения на /app/connect, чтобы добавить нового пользователя в список
         session.send("/app/connect", username);

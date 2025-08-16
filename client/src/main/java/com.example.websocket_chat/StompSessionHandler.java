@@ -140,15 +140,15 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
         session.subscribe("/topic/null-offer", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return String.class;
+                return Message.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
                 try {
-                    if (payload instanceof String) {
-                        String str = (String) payload;
-                        System.out.println("Offer is " + str + " !!!");
+                    if (payload instanceof Message) {
+                        Message message = (Message) payload;
+                        System.out.println(message.getMessage());
                         messageListener.onNullOfferReceive();
                     }
                 } catch (Exception e) {

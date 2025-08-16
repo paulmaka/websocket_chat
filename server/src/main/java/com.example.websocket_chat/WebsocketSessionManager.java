@@ -66,7 +66,7 @@ public class WebsocketSessionManager {
 
     public void requestOfferDescription() {
         if (offer == null) {
-            messagingTemplate.convertAndSend("/topic/null-offer", "null");
+            messagingTemplate.convertAndSend("/topic/null-offer", new Message("server", "Offer is null!!!"));
             System.out.println("Sent from server null offer description.");
         } else {
             messagingTemplate.convertAndSend("/topic/offers", offer);

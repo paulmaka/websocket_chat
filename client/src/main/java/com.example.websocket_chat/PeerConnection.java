@@ -106,6 +106,7 @@ public class PeerConnection {
                             }
                         });
                         System.out.println("Remote description has set.");
+                        stompClient.requestRemoteCandidate(dto.getUsername());
                     }
                     @Override
                     public void onFailure(String error) {
@@ -117,6 +118,7 @@ public class PeerConnection {
                     @Override
                     public void onSuccess() {
                         System.out.println("Remote description set successfully");
+                        stompClient.requestRemoteCandidate(dto.getUsername());
                     }
 
                     @Override
@@ -125,7 +127,6 @@ public class PeerConnection {
                     }
                 });
             }
-            stompClient.requestRemoteCandidate(dto.getUsername());
         }
     }
 

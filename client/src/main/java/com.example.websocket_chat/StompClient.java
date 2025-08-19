@@ -99,7 +99,7 @@ public class StompClient {
 
     public void sendCandidate(RTCIceCandidateDTO dto) {
         session.send("/app/candidate", dto);
-        System.out.println("ICE candidate has sent: " + dto);
+        System.out.println("ICE candidate has sent: " + dto.getUsername());
     }
 
     public void requestRemoteCandidate(String username) {

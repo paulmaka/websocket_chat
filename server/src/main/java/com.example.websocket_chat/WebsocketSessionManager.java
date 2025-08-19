@@ -58,10 +58,13 @@ public class WebsocketSessionManager {
         }
         candidates.get(dto.getUsername()).add(dto);
         messagingTemplate.convertAndSend("/topic/candidates", dto);
-        System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto);
+        System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto.getUsername());
     }
 
     public void requestCandidate(String username) {
+        for (var element : candidates.get(username)) {
+            System.out.println("ICE candidate: " + element + " " + username);
+        }
         while (!candidates.get(username).isEmpty()) {
             messagingTemplate.convertAndSend("/topic/candidates", candidates.get(username).poll());
         }

@@ -108,7 +108,7 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
                     if (payload instanceof RTCIceCandidateDTO) {
                         RTCIceCandidateDTO dto = (RTCIceCandidateDTO) payload;
                         messageListener.onICECandidateReceive(dto);
-                        System.out.println("Receive remote ICE candidate " + dto);
+                        System.out.println("Receive remote ICE candidate " + dto.getUsername());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

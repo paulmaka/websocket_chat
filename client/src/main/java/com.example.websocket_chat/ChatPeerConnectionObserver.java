@@ -95,7 +95,7 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
     @Override
     public void onAddTrack(RTCRtpReceiver receiver, MediaStream[] mediaStreams) {
         try {
-            if (mediaStreams != null) {
+            if (mediaStreams != null && mediaStreams.length > 0) {
                 for (MediaStream stream : mediaStreams) {
                     if (stream != null) {
                         for (AudioTrack track : stream.getAudioTracks()) {
@@ -106,6 +106,8 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
                         }
                     }
                 }
+            } else {
+                System.out.println("onAddTrack called with null or empty mediaStreams array");
             }
         } catch (Exception e) {
             e.printStackTrace();

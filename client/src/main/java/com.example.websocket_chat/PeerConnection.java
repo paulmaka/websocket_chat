@@ -8,7 +8,9 @@ import dev.onvoid.webrtc.media.audio.AudioTrack;
 import dev.onvoid.webrtc.media.audio.AudioTrackSource;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class PeerConnection {
 
@@ -21,6 +23,7 @@ public class PeerConnection {
     private List<String> streamIds;
     private AudioTrack audioTrack;
     private String username;
+    private Queue<RTCIceCandidate> localBuffer = new LinkedList<>();
 
     public PeerConnection(StompClient stompClient, String username) {
         factory = new PeerConnectionFactory();
@@ -78,6 +81,7 @@ public class PeerConnection {
 
     public void receiveRemoteDescription(RTCSessionDescriptionDTO dto) {
         if (!dto.getUsername().equals(username)) {
+            stompClient.requestRemoteCandidate(dto.getUsername());
             RTCSessionDescription remoteDescription = new RTCSessionDescription(RTCSdpType.valueOf(dto.getType().toUpperCase()), dto.getSdp());
 
             if (dto.getType().equalsIgnoreCase("offer")) {
@@ -106,7 +110,8 @@ public class PeerConnection {
                             }
                         });
                         System.out.println("Remote description has set.");
-                        stompClient.requestRemoteCandidate(username);
+                        checkBuffer();
+                        setCandidates();
                     }
                     @Override
                     public void onFailure(String error) {
@@ -118,7 +123,8 @@ public class PeerConnection {
                     @Override
                     public void onSuccess() {
                         System.out.println("Remote description set successfully");
-                        stompClient.requestRemoteCandidate(username);
+                        checkBuffer();
+                        setCandidates();
                     }
 
                     @Override
@@ -138,8 +144,20 @@ public class PeerConnection {
             } else {
                 remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), "");
             }
-            peerConnection.addIceCandidate(remoteCandidate);
-            System.out.println("Remote ICE Candidate set successfully.");
+            localBuffer.add(remoteCandidate);
+            System.out.println("Remote ICE Candidate added successfully.");
+        }
+    }
+
+    private void checkBuffer() {
+        for (var i : localBuffer) {
+            System.out.println("Buffer have " + i);
+        }
+    }
+    private void setCandidates() {
+        for (var candidate : localBuffer) {
+            peerConnection.addIceCandidate(candidate);
+            System.out.println(candidate + " set successfully to " + username);
         }
     }
 

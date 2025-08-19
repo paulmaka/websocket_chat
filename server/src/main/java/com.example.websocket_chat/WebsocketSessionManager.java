@@ -11,7 +11,6 @@ import java.util.*;
 public class WebsocketSessionManager {
     private final ArrayList<String> activeUsernames = new ArrayList<>();
     private final Map<String, Queue<RTCIceCandidateDTO>> candidates = new HashMap<>();
-    private Map<String, Boolean> userReady = new HashMap<>();
     private RTCSessionDescriptionDTO offer = null;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -61,30 +60,14 @@ public class WebsocketSessionManager {
     }
 
     public void requestCandidate(String username) {
-        userReady.put(username, true);
-
-        if (allUsersReady()) {
-            for (String user : candidates.keySet()) {
-                for (var element : candidates.get(user)) {
-                    System.out.println("ICE candidate: " + element + " " + user);
-                }
-                while (!candidates.get(user).isEmpty()) {
-                    messagingTemplate.convertAndSend("/topic/candidates", candidates.get(user).poll());
-                }
-            }
+        for (var element : candidates.get(username)) {
+            System.out.println("ICE candidate: " + element + " " + username);
+        }
+        while (!candidates.get(username).isEmpty()) {
+            messagingTemplate.convertAndSend("/topic/candidates", candidates.get(username).poll());
         }
     }
 
-    private boolean allUsersReady() {
-        for (String user : userReady.keySet()) {
-            if (!userReady.get(user)) {
-                System.out.println("Users not ready!");
-                return false;
-            }
-        }
-        System.out.println("Users are ready!");
-        return true;
-    }
 
     public void requestOfferDescription() {
         if (offer == null) {

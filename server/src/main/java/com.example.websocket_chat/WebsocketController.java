@@ -96,7 +96,7 @@ public class WebsocketController {
     @MessageMapping("/request-candidate")
     public void requestICECandidate(String username) {
         sessionManager.requestCandidate(username);
-        System.out.println("Sent from server candidate: " + username);
+        System.out.println("Sent from server candidates: " + username);
     }
 
     @MessageMapping("/request-offer")

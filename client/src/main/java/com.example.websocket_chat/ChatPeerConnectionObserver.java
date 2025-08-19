@@ -69,10 +69,14 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
     @Override
     public void onAddStream(MediaStream stream) {
-        System.out.println("Remote stream added: " + stream.id());
-        for (AudioTrack track : stream.getAudioTracks()) {
-            System.out.println("Remote audio track: " + track.getId());
-            track.setEnabled(true);
+        try {
+            System.out.println("Remote stream added: " + stream.id());
+            for (AudioTrack track : stream.getAudioTracks()) {
+                System.out.println("Remote audio track: " + track.getId());
+                track.setEnabled(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -90,15 +94,19 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
     @Override
     public void onAddTrack(RTCRtpReceiver receiver, MediaStream[] mediaStreams) {
-        if (mediaStreams != null) {
-            for (MediaStream stream : mediaStreams) {
-                if (stream != null) {
-                    for (AudioTrack track : stream.getAudioTracks()) {
-                        System.out.println("Remote audio track via onAddTrack: " + track.getId());
-                        track.setEnabled(true);
+        try {
+            if (mediaStreams != null) {
+                for (MediaStream stream : mediaStreams) {
+                    if (stream != null) {
+                        for (AudioTrack track : stream.getAudioTracks()) {
+                            System.out.println("Remote audio track via onAddTrack: " + track.getId());
+                            track.setEnabled(true);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 //        for (MediaStream stream : mediaStreams) {
 //            for (AudioTrack track : stream.getAudioTracks()) {
@@ -114,10 +122,14 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
 
     @Override
     public void onTrack(RTCRtpTransceiver transceiver) {
-        MediaStreamTrack track = transceiver.getReceiver().getTrack();
-        System.out.println("Remote track via onTrack: " + track.getId());
-        if (track instanceof AudioTrack) {
-            ((AudioTrack) track).setEnabled(true); // Включаем воспроизведение
+        try {
+            MediaStreamTrack track = transceiver.getReceiver().getTrack();
+            System.out.println("Remote track via onTrack: " + track.getId());
+            if (track instanceof AudioTrack) {
+                ((AudioTrack) track).setEnabled(true); // Включаем воспроизведение
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 //        MediaStreamTrack track = transceiver.getReceiver().getTrack();
 //        System.out.println("Remote audio track received via onTrack: " + track.getId());

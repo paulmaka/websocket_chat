@@ -93,7 +93,6 @@ public class PeerConnection {
                                         RTCSessionDescriptionDTO dtoAnswer = new RTCSessionDescriptionDTO(answer.sdpType.name().toLowerCase(), answer.sdp, username);
                                         stompClient.sendAnswerDescription(dtoAnswer);
                                         System.out.println("Local description has set.");
-                                        System.out.println("An answer has sent: " + dtoAnswer);
                                     }
                                     @Override
                                     public void onFailure(String error) {

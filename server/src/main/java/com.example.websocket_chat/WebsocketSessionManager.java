@@ -9,12 +9,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 @Service
 public class WebsocketSessionManager {
     private final ArrayList<String> activeUsernames = new ArrayList<>();
-    private final Map<String, RTCIceCandidateDTO> candidates = new HashMap<>();
+    private final Map<String, LinkedList<RTCIceCandidateDTO>> candidates = new HashMap<>();
     private RTCSessionDescriptionDTO offer = null;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -55,13 +56,15 @@ public class WebsocketSessionManager {
     }
 
     public void broadcastICECandidate(RTCIceCandidateDTO dto) {
-        candidates.put(dto.getUsername(), dto);
+        candidates.get(dto.getUsername()).add(dto);
         messagingTemplate.convertAndSend("/topic/candidates", dto);
         System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto);
     }
 
     public void requestCandidate(String username) {
-        messagingTemplate.convertAndSend("/topic/candidates", candidates.get(username));
+        while (!candidates.get(username).isEmpty()) {
+            messagingTemplate.convertAndSend("/topic/candidates", candidates.get(username).poll());
+        }
     }
 
     public void requestOfferDescription() {

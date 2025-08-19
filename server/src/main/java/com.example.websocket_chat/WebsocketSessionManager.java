@@ -78,9 +78,11 @@ public class WebsocketSessionManager {
     private boolean allUsersReady() {
         for (String user : userReady.keySet()) {
             if (!userReady.get(user)) {
+                System.out.println("Users not ready!");
                 return false;
             }
         }
+        System.out.println("Users are ready!");
         return true;
     }
 

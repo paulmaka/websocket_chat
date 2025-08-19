@@ -1,8 +1,6 @@
 package com.example.websocket_chat;
 
 
-import dev.onvoid.webrtc.RTCIceCandidate;
-import dev.onvoid.webrtc.RTCSessionDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -13,6 +11,7 @@ import java.util.*;
 public class WebsocketSessionManager {
     private final ArrayList<String> activeUsernames = new ArrayList<>();
     private final Map<String, Queue<RTCIceCandidateDTO>> candidates = new HashMap<>();
+    private Map<String, Boolean> userReady = new HashMap<>();
     private RTCSessionDescriptionDTO offer = null;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -52,22 +51,37 @@ public class WebsocketSessionManager {
         System.out.println("Broadcasting answer to /topic/answers " + dto);
     }
 
-    public void broadcastICECandidate(RTCIceCandidateDTO dto) {
+    public void addICECandidate(RTCIceCandidateDTO dto) {
         if (candidates.get(dto.getUsername()) == null) {
             candidates.put(dto.getUsername(), new LinkedList<>());
         }
         candidates.get(dto.getUsername()).add(dto);
-        messagingTemplate.convertAndSend("/topic/candidates", dto);
-        System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto.getUsername());
+//        messagingTemplate.convertAndSend("/topic/candidates", dto);
+        System.out.println("Adding ICE candidate to /topic/candidates " + dto.getUsername());
     }
 
     public void requestCandidate(String username) {
-        for (var element : candidates.get(username)) {
-            System.out.println("ICE candidate: " + element + " " + username);
+        userReady.put(username, true);
+
+        if (allUsersReady()) {
+            for (String user : candidates.keySet()) {
+                for (var element : candidates.get(user)) {
+                    System.out.println("ICE candidate: " + element + " " + user);
+                }
+                while (!candidates.get(user).isEmpty()) {
+                    messagingTemplate.convertAndSend("/topic/candidates", candidates.get(user).poll());
+                }
+            }
         }
-        while (!candidates.get(username).isEmpty()) {
-            messagingTemplate.convertAndSend("/topic/candidates", candidates.get(username).poll());
+    }
+
+    private boolean allUsersReady() {
+        for (String user : userReady.keySet()) {
+            if (!userReady.get(user)) {
+                return false;
+            }
         }
+        return true;
     }
 
     public void requestOfferDescription() {

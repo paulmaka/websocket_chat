@@ -99,8 +99,10 @@ public class ChatPeerConnectionObserver implements PeerConnectionObserver {
                 for (MediaStream stream : mediaStreams) {
                     if (stream != null) {
                         for (AudioTrack track : stream.getAudioTracks()) {
-                            System.out.println("Remote audio track via onAddTrack: " + track.getId());
-                            track.setEnabled(true);
+                            if (track != null) {
+                                System.out.println("Remote audio track via onAddTrack: " + track.getId());
+                                track.setEnabled(true);
+                            }
                         }
                     }
                 }

@@ -106,7 +106,7 @@ public class PeerConnection {
                             }
                         });
                         System.out.println("Remote description has set.");
-                        stompClient.requestRemoteCandidate(dto.getUsername());
+                        stompClient.requestRemoteCandidate(username);
                     }
                     @Override
                     public void onFailure(String error) {
@@ -118,7 +118,7 @@ public class PeerConnection {
                     @Override
                     public void onSuccess() {
                         System.out.println("Remote description set successfully");
-                        stompClient.requestRemoteCandidate(dto.getUsername());
+                        stompClient.requestRemoteCandidate(username);
                     }
 
                     @Override
@@ -132,7 +132,12 @@ public class PeerConnection {
 
     public void receiveRemoteCandidate(RTCIceCandidateDTO dto) {
         if (!dto.getUsername().equals(username) && peerConnection.getRemoteDescription() != null) {
-            RTCIceCandidate remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), dto.getSdpMid());
+            RTCIceCandidate remoteCandidate;
+            if (dto.getSdpMid() != null) {
+                remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), dto.getSdpMid());
+            } else {
+                remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), "");
+            }
             peerConnection.addIceCandidate(remoteCandidate);
             System.out.println("Remote ICE Candidate set successfully.");
         }

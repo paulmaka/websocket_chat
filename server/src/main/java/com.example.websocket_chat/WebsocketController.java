@@ -1,8 +1,6 @@
 package com.example.websocket_chat;
 
 
-import dev.onvoid.webrtc.RTCIceCandidate;
-import dev.onvoid.webrtc.RTCSessionDescription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
@@ -89,7 +87,7 @@ public class WebsocketController {
 
     @MessageMapping("/candidate")
     public void handleICECandidates(RTCIceCandidateDTO dto) {
-        sessionManager.broadcastICECandidate(dto);
+        sessionManager.addICECandidate(dto);
         System.out.println("Handling ICE candidate");
     }
 

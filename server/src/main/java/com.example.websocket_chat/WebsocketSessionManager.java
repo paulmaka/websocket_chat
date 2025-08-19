@@ -7,15 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class WebsocketSessionManager {
     private final ArrayList<String> activeUsernames = new ArrayList<>();
-    private final Map<String, LinkedList<RTCIceCandidateDTO>> candidates = new HashMap<>();
+    private final Map<String, Queue<RTCIceCandidateDTO>> candidates = new HashMap<>();
     private RTCSessionDescriptionDTO offer = null;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -56,6 +53,9 @@ public class WebsocketSessionManager {
     }
 
     public void broadcastICECandidate(RTCIceCandidateDTO dto) {
+        if (candidates.get(dto.getUsername()) == null) {
+            candidates.put(dto.getUsername(), new LinkedList<>());
+        }
         candidates.get(dto.getUsername()).add(dto);
         messagingTemplate.convertAndSend("/topic/candidates", dto);
         System.out.println("Broadcasting ICE candidate to /topic/candidates " + dto);

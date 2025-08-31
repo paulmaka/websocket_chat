@@ -8,33 +8,43 @@ import dev.onvoid.webrtc.media.audio.AudioTrack;
 import dev.onvoid.webrtc.media.audio.AudioTrackSource;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PeerConnection {
 
     private PeerConnectionFactory factory;
     private RTCConfiguration config;
-    private RTCIceServer iceServer;
+    private RTCIceServer iceServerStun;
+    private RTCIceServer iceServerTurn;
     private RTCPeerConnection peerConnection;
     private StompClient stompClient;
     private List<AudioDevice> audioDevices;
     private List<String> streamIds;
     private AudioTrack audioTrack;
     private String username;
-    private Queue<RTCIceCandidate> localBuffer = new LinkedList<>();
+    private final Queue<RTCIceCandidate> localBuffer = new ConcurrentLinkedQueue<>();
+
 
     public PeerConnection(StompClient stompClient, String username) {
         factory = new PeerConnectionFactory();
         config = new RTCConfiguration();
-        iceServer = new RTCIceServer();
         this.username = username;
         this.stompClient = stompClient;
 
+        iceServerStun = new RTCIceServer();
+        iceServerStun.urls.add("stun:stun.l.google.com:19302");
 
-        iceServer.urls.add("stun:stun.l.google.com:19302");
-        config.iceServers.add(iceServer);
+        iceServerTurn = new RTCIceServer();
+        iceServerTurn.urls.add("turn:turnserverip:3478");
+
+        iceServerTurn.username = "client";
+        iceServerTurn.password = "secret01012005";
+
+        config.iceServers.add(iceServerStun);
+        config.iceServers.add(iceServerTurn);
+
         config.iceTransportPolicy = RTCIceTransportPolicy.ALL;
         config.bundlePolicy = RTCBundlePolicy.BALANCED;
         config.rtcpMuxPolicy = RTCRtcpMuxPolicy.REQUIRE;
@@ -81,7 +91,17 @@ public class PeerConnection {
 
     public void receiveRemoteDescription(RTCSessionDescriptionDTO dto) {
         if (!dto.getUsername().equals(username)) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             stompClient.requestRemoteCandidate(dto.getUsername());
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             RTCSessionDescription remoteDescription = new RTCSessionDescription(RTCSdpType.valueOf(dto.getType().toUpperCase()), dto.getSdp());
 
             if (dto.getType().equalsIgnoreCase("offer")) {
@@ -110,7 +130,6 @@ public class PeerConnection {
                             }
                         });
                         System.out.println("Remote description has set.");
-                        checkBuffer();
                         setCandidates();
                     }
                     @Override
@@ -123,7 +142,6 @@ public class PeerConnection {
                     @Override
                     public void onSuccess() {
                         System.out.println("Remote description set successfully");
-                        checkBuffer();
                         setCandidates();
                     }
 
@@ -137,25 +155,21 @@ public class PeerConnection {
     }
 
     public void receiveRemoteCandidate(RTCIceCandidateDTO dto) {
-        if (!dto.getUsername().equals(username) && peerConnection.getRemoteDescription() != null) {
-            RTCIceCandidate remoteCandidate;
-            if (dto.getSdpMid() != null) {
-                remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), dto.getSdpMid());
-            } else {
-                remoteCandidate = new RTCIceCandidate(dto.getCandidate(), dto.getSdpMLineIndex(), "");
-            }
-            localBuffer.add(remoteCandidate);
-            System.out.println("Remote ICE Candidate added successfully.");
-        }
-    }
+        if (dto.getUsername().equals(username)) return;
 
-    private void checkBuffer() {
-        for (var i : localBuffer) {
-            System.out.println("Buffer have " + i);
+        RTCIceCandidate c = new RTCIceCandidate(dto.getSdpMid(), dto.getSdpMLineIndex(), dto.getCandidate());
+
+        if (peerConnection.getRemoteDescription() == null) {
+            localBuffer.add(c);
+            System.out.println("Buffered remote ICE candidate.");
+        } else {
+            peerConnection.addIceCandidate(c);
+            System.out.println("Applied remote ICE candidate immediately to " + username);
         }
     }
     private void setCandidates() {
-        for (var candidate : localBuffer) {
+        RTCIceCandidate candidate;
+        while ((candidate = localBuffer.poll()) != null) {
             peerConnection.addIceCandidate(candidate);
             System.out.println(candidate + " set successfully to " + username);
         }

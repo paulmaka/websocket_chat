@@ -47,7 +47,7 @@ public class StompClient {
         StompSessionHandler sessionHandler = new StompSessionHandler(messageListener, username);
 
         // Адрес WebSocket сервера.
-        String url = "http://localhost:80/ws"; //TODO выенсти в CI/CD
+        String url = "http://localhost:80/ws";
 
         // Создание STOMP сессии с подключением к заданному серверу и передачей созданного обработчика.
         session = stompClient.connectAsync(url, sessionHandler).get();

@@ -1,6 +1,9 @@
-package com.example.websocket_chat.client;
+package com.example.websocket_chat;
 
-import com.example.websocket_chat.common.Message;
+
+
+import dev.onvoid.webrtc.RTCIceCandidate;
+import dev.onvoid.webrtc.RTCSessionDescription;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -18,6 +21,8 @@ public class ClientGUI extends JFrame implements MessageListener{
     private StompClient stompClient;
     private String username;
     private JScrollPane messageScrollPane;
+    private PeerConnection connection;
+    private boolean voiceChatEnable = false;
 
     public ClientGUI(String username) throws ExecutionException, InterruptedException {
         super("User: " + username);
@@ -35,6 +40,7 @@ public class ClientGUI extends JFrame implements MessageListener{
                 if (option == JOptionPane.YES_OPTION) {
                     stompClient.disconnectUser(username);
                     ClientGUI.this.dispose();
+                    connection = null;
                 }
             }
         });
@@ -59,7 +65,7 @@ public class ClientGUI extends JFrame implements MessageListener{
 
     private void addConnectedUsersComponents() {
         connectedUsersPanel = new JPanel();
-        connectedUsersPanel.setBorder(Utilities.addPadding(10, 10, 10, 10));
+        connectedUsersPanel.setBorder(Utilities.addPadding(10, 10, 10, 10, Utilities.THIRD_COLOR));
         connectedUsersPanel.setLayout(new BoxLayout(connectedUsersPanel, BoxLayout.Y_AXIS));
         connectedUsersPanel.setBackground(Utilities.SECONDARY_COLOR);
         connectedUsersPanel.setPreferredSize(new Dimension(200, getHeight()));
@@ -69,6 +75,8 @@ public class ClientGUI extends JFrame implements MessageListener{
         connectedUsersLabel.setForeground(Utilities.TEXT_COLOR);
 
         connectedUsersPanel.add(connectedUsersLabel);
+        JButton button = createVoiceChatButton();
+        connectedUsersPanel.add(button);
 
         add(connectedUsersPanel, BorderLayout.WEST);
     }
@@ -97,9 +105,9 @@ public class ClientGUI extends JFrame implements MessageListener{
         chatPanel.add(messageScrollPane, BorderLayout.CENTER);
 
         JPanel inputPanel = new JPanel();
-        inputPanel.setBorder(Utilities.addPadding(10, 10, 10, 10));
+        inputPanel.setBorder(Utilities.addPadding(5, 5, 5, 5, Utilities.THIRD_COLOR));
         inputPanel.setLayout(new BorderLayout());
-        inputPanel.setBackground(Utilities.TRANSPARENT_COLOR);
+        inputPanel.setBackground(Utilities.SECONDARY_COLOR);
 
         JTextField inputField = new JTextField();
         inputField.addKeyListener(new KeyAdapter() {
@@ -111,14 +119,13 @@ public class ClientGUI extends JFrame implements MessageListener{
                     if (input.isEmpty()) {
                         return;
                     }
-
                     inputField.setText("");
 
                     stompClient.sendMessage(new Message(username, input));
                 }
             }
         });
-        inputField.setBackground(Utilities.SECONDARY_COLOR);
+        inputField.setBackground(Utilities.PRIMARY_COLOR);
         inputField.setForeground(Utilities.TEXT_COLOR);
         inputField.setBorder(Utilities.addPadding(0, 10, 0, 10));
         inputField.setFont(new Font("Inter", Font.PLAIN, 16));
@@ -150,21 +157,47 @@ public class ClientGUI extends JFrame implements MessageListener{
         updateMessageLabelWidth(messageLabel);
         messageLabel.setFont(new Font("Inter", Font.PLAIN, 16));
         messageLabel.setForeground(Utilities.TEXT_COLOR);
+      
+//        if (username.equals(message.getUser())) {
+//            usernameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+//            messageLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+//
+//            messageLabel.setText("<html><div style='width:" + (0.60 * getWidth()) +
+//                    "px; text-align:right'>" +
+//                    message.getMessage() + "</div></html>");
+//
+//        }
 
-        if (username.equals(message.getUser())) {
-            usernameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-            messageLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-
-            messageLabel.setText("<html><div style='width:" + (0.60 * getWidth()) +
-                    "px; text-align:right'>" +
-                    message.getMessage() + "</div></html>");
-
-        }
 
         chatMessage.add(usernameLabel);
         chatMessage.add(messageLabel);
 
         return chatMessage;
+    }
+
+    private JButton createVoiceChatButton() {
+        // Создаем новую кнопку
+        JButton button = new JButton("Voice");
+        button.setBackground(Utilities.BUTTON_ENABLE);
+
+        // Добавляем обработчик событий
+        button.addActionListener(e -> {
+            // Этот код будет выполняться при нажатии на кнопку
+            if (voiceChatEnable) {
+                voiceChatEnable = false;
+                button.setText("Voice");
+                button.setBackground(Utilities.BUTTON_ENABLE);
+                disableVoiceChat();
+            } else {
+                voiceChatEnable = true;
+                button.setText("Close");
+                button.setBackground(Utilities.BUTTON_DISABLE);
+                enableVoiceChat();
+            }
+            System.out.println("Кнопка была нажата!");
+        });
+
+        return button;
     }
 
     @Override
@@ -185,8 +218,8 @@ public class ClientGUI extends JFrame implements MessageListener{
      */
     @Override
     public void onActiveUsersUpdated(ArrayList<String> users) {
-        if (connectedUsersPanel.getComponents().length >= 2) {
-            connectedUsersPanel.remove(1);
+        if (connectedUsersPanel.getComponents().length >= 3) {
+            connectedUsersPanel.remove(2);
         }
 
         JPanel userListPanel = new JPanel();
@@ -207,6 +240,31 @@ public class ClientGUI extends JFrame implements MessageListener{
         repaint();
     }
 
+    @Override
+    public void onAnswerReceive(RTCSessionDescriptionDTO dto) {
+        try {
+            connection.receiveRemoteDescription(dto);
+        } catch (Exception e) {}
+    }
+
+    @Override
+    public void onOfferReceive(RTCSessionDescriptionDTO dto) {
+        try {
+            connection.receiveRemoteDescription(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onNullOfferReceive() {
+        connection.createAndSendDescription();
+    }
+
+    @Override
+    public void onICECandidateReceive(RTCIceCandidateDTO dto) {
+        connection.receiveRemoteCandidate(dto);
+    }
 
     private void updateMessageSize() {
         for (int i = 0; i < messagePanel.getComponents().length; i++) {
@@ -229,5 +287,17 @@ public class ClientGUI extends JFrame implements MessageListener{
         label.setText("<html><div style='width:" + (int)(0.60 * getWidth()) +
                 "px; white-space: normal; word-wrap: break-word;'>" +
                 rawText + "</div></html>");
+    }
+
+
+    private void enableVoiceChat() {
+        connection = new PeerConnection(stompClient, username);
+        stompClient.requestRemoteDescription();
+        System.out.println("Voice chat enabled in GUI");
+    }
+
+    private void disableVoiceChat() {
+        connection.cleanup();
+        System.out.println("Voice chat disabled in GUI");
     }
 }

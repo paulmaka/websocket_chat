@@ -1,4 +1,4 @@
-package com.example.websocket_chat.server;
+package com.example.websocket_chat;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

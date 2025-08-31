@@ -1,6 +1,7 @@
-package com.example.websocket_chat.client;
+package com.example.websocket_chat;
 
-import com.example.websocket_chat.common.Message;
+import dev.onvoid.webrtc.RTCIceCandidate;
+import dev.onvoid.webrtc.RTCSessionDescription;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -46,13 +47,16 @@ public class StompClient {
         StompSessionHandler sessionHandler = new StompSessionHandler(messageListener, username);
 
         // Адрес WebSocket сервера.
-        String url = "http://localhost/ws"; //TODO выенсти в CI/CD
+        String url = "http://localhost:80/ws";
 
         // Создание STOMP сессии с подключением к заданному серверу и передачей созданного обработчика.
         session = stompClient.connectAsync(url, sessionHandler).get();
     }
 
-    // Отправляет объект message на /app/message
+    /** Отправляет объект message на /app/message
+     *
+     * @param message
+     */
     public void sendMessage(Message message) {
         try {
             session.send("/app/message", message);
@@ -70,6 +74,42 @@ public class StompClient {
     public void disconnectUser(String username) {
         session.send("/app/disconnect", username);
         System.out.println("Disconnect user: " + username);
+    }
+
+
+    /**
+     * Отправляет offer на /app/description
+     *
+     */
+    public void sendOfferDescription(RTCSessionDescriptionDTO dto) {
+        session.send("/app/offer", dto);
+        System.out.println("Offer has sent: " + dto);
+    }
+
+    public void sendAnswerDescription(RTCSessionDescriptionDTO dto) {
+        session.send("/app/answer", dto);
+        System.out.println("Answer has sent: " + dto);
+    }
+
+
+    /**
+     * Отправляет ICE candidate на signaling server /app/candidate
+     *
+     */
+
+    public void sendCandidate(RTCIceCandidateDTO dto) {
+        session.send("/app/candidate", dto);
+        System.out.println("ICE candidate has sent: " + dto.getUsername());
+    }
+
+    public void requestRemoteCandidate(String username) {
+        session.send("/app/request-candidate", username);
+        System.out.println("Request candidate: " + username);
+    }
+
+    public void requestRemoteDescription() {
+        session.send("/app/request-offer", "");
+        System.out.println("Request description");
     }
 
 }

@@ -1,6 +1,7 @@
 package com.example.websocket_chat;
 
 
+
 import dev.onvoid.webrtc.RTCIceCandidate;
 import dev.onvoid.webrtc.RTCSessionDescription;
 
@@ -156,7 +157,7 @@ public class ClientGUI extends JFrame implements MessageListener{
         updateMessageLabelWidth(messageLabel);
         messageLabel.setFont(new Font("Inter", Font.PLAIN, 16));
         messageLabel.setForeground(Utilities.TEXT_COLOR);
-
+      
 //        if (username.equals(message.getUser())) {
 //            usernameLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
 //            messageLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
@@ -166,6 +167,7 @@ public class ClientGUI extends JFrame implements MessageListener{
 //                    message.getMessage() + "</div></html>");
 //
 //        }
+
 
         chatMessage.add(usernameLabel);
         chatMessage.add(messageLabel);

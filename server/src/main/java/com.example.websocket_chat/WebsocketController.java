@@ -68,7 +68,6 @@ public class WebsocketController {
         System.out.println("Requesting Users");
     }
 
-
     /**
      * Метод принимает description от клиента, собирающегося создать прямое подключение и рассылает всем пользователся,
      * подписанным на /topic/peer

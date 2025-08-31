@@ -1,5 +1,7 @@
 package com.example.websocket_chat;
 
+import dev.onvoid.webrtc.RTCIceCandidate;
+import dev.onvoid.webrtc.RTCSessionDescription;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -72,6 +74,89 @@ public class StompSessionHandler extends StompSessionHandlerAdapter {
             }
         });
         System.out.println("Client subscribed to /topic/users");
+
+        session.subscribe("/topic/answers", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return RTCSessionDescriptionDTO.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof RTCSessionDescriptionDTO) {
+                        RTCSessionDescriptionDTO dto = (RTCSessionDescriptionDTO) payload;
+                        messageListener.onAnswerReceive(dto);
+                        System.out.println("Receive remote answers: " + dto);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/answers");
+
+        session.subscribe("/topic/candidates", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return RTCIceCandidateDTO.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof RTCIceCandidateDTO) {
+                        RTCIceCandidateDTO dto = (RTCIceCandidateDTO) payload;
+                        System.out.println("Receive remote ICE candidate " + dto.getUsername());
+                        messageListener.onICECandidateReceive(dto);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/candidates");
+
+        session.subscribe("/topic/offers", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return RTCSessionDescriptionDTO.class;
+            }
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof RTCSessionDescriptionDTO) {
+                        RTCSessionDescriptionDTO dto = (RTCSessionDescriptionDTO) payload;
+                        System.out.println("Receive remote offer: " + dto);
+                        messageListener.onOfferReceive(dto);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/offers");
+
+        session.subscribe("/topic/null-offer", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return Message.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                try {
+                    if (payload instanceof Message) {
+                        Message message = (Message) payload;
+                        System.out.println(message.getMessage());
+                        messageListener.onNullOfferReceive();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        System.out.println("Client subscribed to /topic/null-offer");
 
         // Отправка сообщения на /app/connect, чтобы добавить нового пользователя в список
         session.send("/app/connect", username);

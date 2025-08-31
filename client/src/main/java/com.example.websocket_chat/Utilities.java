@@ -13,6 +13,8 @@ public class Utilities {
     public static final Color THIRD_COLOR = Color.decode("#4d4d4d");
     public static final Color ORANGE_COLOR = Color.decode("#f7931a");
     public static final Color TEXT_COLOR = Color.WHITE;
+    public static final Color BUTTON_ENABLE = Color.GREEN;
+    public static final Color BUTTON_DISABLE = Color.RED;
 
 
     public static EmptyBorder addPadding(int top, int left, int bottom, int right) {

@@ -3,7 +3,6 @@ package com.example.websocket_chat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -13,12 +12,10 @@ import org.springframework.stereotype.Controller;
 public class WebsocketController {
 
     // Используется Websocket для отправки сообщений клиентам.
-    private final SimpMessagingTemplate messagingTemplate;
-    private final WebSocketSessionManager sessionManager;
+    private final WebsocketSessionManager sessionManager;
 
     @Autowired
-    public WebsocketController(SimpMessagingTemplate messagingTemplate, WebSocketSessionManager sessionManager) {
-        this.messagingTemplate = messagingTemplate;
+    public WebsocketController(WebsocketSessionManager sessionManager) {
         this.sessionManager = sessionManager;
     }
 
@@ -33,8 +30,7 @@ public class WebsocketController {
     @MessageMapping("/message")
     public void handleMessage(Message message) {
         System.out.println("Received message from user: " + message.getUser() + ": " + message.getMessage());
-        messagingTemplate.convertAndSend("/topic/messages", message);
-        System.out.println("Sent message to /topic/messages: " + message.getUser() + ": " + message.getMessage());
+        sessionManager.broadcastNewMessage(message);
     }
 
     /**
@@ -70,5 +66,38 @@ public class WebsocketController {
     public void requestUsers() {
         sessionManager.broadcastActiveUsernames();
         System.out.println("Requesting Users");
+    }
+
+    /**
+     * Метод принимает description от клиента, собирающегося создать прямое подключение и рассылает всем пользователся,
+     * подписанным на /topic/peer
+     */
+    @MessageMapping("/offer")
+    public void handleOfferDescription(RTCSessionDescriptionDTO dto) {
+        sessionManager.setOfferDescription(dto);
+        System.out.println("Handling offer description");
+    }
+
+    @MessageMapping("/answer")
+    public void handleAnswerDescription(RTCSessionDescriptionDTO dto) {
+        sessionManager.broadcastAnswer(dto);
+        System.out.println("Handling answer description");
+    }
+
+    @MessageMapping("/candidate")
+    public void handleICECandidates(RTCIceCandidateDTO dto) {
+        sessionManager.addICECandidate(dto);
+        System.out.println("Handling ICE candidate");
+    }
+
+    @MessageMapping("/request-candidate")
+    public void requestICECandidate(String username) {
+        sessionManager.requestCandidate(username);
+        System.out.println("Sent from server candidates: " + username);
+    }
+
+    @MessageMapping("/request-offer")
+    public void requestDescription() {
+        sessionManager.requestOfferDescription();
     }
 }
